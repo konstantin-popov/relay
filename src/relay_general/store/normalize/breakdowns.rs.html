@@ -1,103 +1,109 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `relay-general/src/store/normalize/breakdowns.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>breakdowns.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../relay_general/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `relay-general/src/store/normalize/breakdowns.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>breakdowns.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../relay_general/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../../relay_general/index.html"><div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../relay_general/index.html">
+                        <img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -387,158 +393,70 @@
 <span id="386">386</span>
 <span id="387">387</span>
 <span id="388">388</span>
-<span id="389">389</span>
-<span id="390">390</span>
-<span id="391">391</span>
-<span id="392">392</span>
-<span id="393">393</span>
-<span id="394">394</span>
-<span id="395">395</span>
-<span id="396">396</span>
-<span id="397">397</span>
-<span id="398">398</span>
-<span id="399">399</span>
-<span id="400">400</span>
-<span id="401">401</span>
-<span id="402">402</span>
-<span id="403">403</span>
-<span id="404">404</span>
-<span id="405">405</span>
-<span id="406">406</span>
-<span id="407">407</span>
-<span id="408">408</span>
-<span id="409">409</span>
-<span id="410">410</span>
-<span id="411">411</span>
-<span id="412">412</span>
-<span id="413">413</span>
-<span id="414">414</span>
-<span id="415">415</span>
-<span id="416">416</span>
-<span id="417">417</span>
-<span id="418">418</span>
-<span id="419">419</span>
-<span id="420">420</span>
-<span id="421">421</span>
-<span id="422">422</span>
-<span id="423">423</span>
-<span id="424">424</span>
-<span id="425">425</span>
-<span id="426">426</span>
-<span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
-<span id="437">437</span>
-<span id="438">438</span>
-<span id="439">439</span>
-<span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Contains the breakdowns normalization code</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Contains the breakdowns normalization code</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This module is responsible for generating breakdowns for events, such as span operation breakdowns.</span>
 
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
+<span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::protocol</span>::{<span class="ident">Breakdowns</span>, <span class="ident">Event</span>, <span class="ident">Measurement</span>, <span class="ident">Measurements</span>, <span class="ident">Timestamp</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::types::Annotated</span>;
+<span class="kw">use</span> <span class="ident">relay_common</span>::{<span class="ident">DurationUnit</span>, <span class="ident">MetricUnit</span>};
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">TimeWindowSpan</span> {
-    <span class="ident">start_timestamp</span>: <span class="ident">Timestamp</span>,
-    <span class="ident">end_timestamp</span>: <span class="ident">Timestamp</span>,
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::protocol</span>::{<span class="ident">Breakdowns</span>, <span class="ident">Event</span>, <span class="ident">Measurement</span>, <span class="ident">Measurements</span>, <span class="ident">Timestamp</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types::Annotated</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeWindowSpan</span> {
+    <span class="kw">pub</span> <span class="ident">start</span>: <span class="ident">Timestamp</span>,
+    <span class="kw">pub</span> <span class="ident">end</span>: <span class="ident">Timestamp</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">TimeWindowSpan</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">start_timestamp</span>: <span class="ident">Timestamp</span>, <span class="ident">end_timestamp</span>: <span class="ident">Timestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">end_timestamp</span> <span class="op">&lt;</span> <span class="ident">start_timestamp</span> {
-            <span class="kw">return</span> <span class="ident">TimeWindowSpan</span> {
-                <span class="ident">start_timestamp</span>: <span class="ident">end_timestamp</span>,
-                <span class="ident">end_timestamp</span>: <span class="ident">start_timestamp</span>,
-            };
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">start</span>: <span class="ident">Timestamp</span>, <span class="kw-2">mut</span> <span class="ident">end</span>: <span class="ident">Timestamp</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span> <span class="ident">start</span> {
+            <span class="ident">std::mem::swap</span>(<span class="kw-2">&amp;mut</span> <span class="ident">start</span>, <span class="kw-2">&amp;mut</span> <span class="ident">end</span>);
         }
 
-        <span class="ident">TimeWindowSpan</span> {
-            <span class="ident">start_timestamp</span>,
-            <span class="ident">end_timestamp</span>,
-        }
+        <span class="ident">TimeWindowSpan</span> { <span class="ident">start</span>, <span class="ident">end</span> }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_duration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
-        <span class="kw">let</span> <span class="ident">delta</span>: <span class="ident">f64</span> <span class="op">=</span>
-            (<span class="self">self</span>.<span class="ident">end_timestamp</span>.<span class="ident">timestamp_nanos</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">start_timestamp</span>.<span class="ident">timestamp_nanos</span>()) <span class="kw">as</span> <span class="ident">f64</span>;
-        <span class="comment">// convert to milliseconds (1 ms = 1,000,000 nanoseconds)</span>
-        (<span class="ident">delta</span> <span class="op">/</span> <span class="number">1_000_000.00</span>).<span class="ident">abs</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Duration</span> {
+        <span class="comment">// Cannot fail since durations are ordered in the constructor</span>
+        (<span class="self">self</span>.<span class="ident">end</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">start</span>).<span class="ident">to_std</span>().<span class="ident">unwrap_or_default</span>()
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">enum</span> <span class="ident">OperationBreakdown</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">Emit</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>),
     <span class="ident">DoNotEmit</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>),
 }
 
-<span class="kw">fn</span> <span class="ident">get_op_time_spent</span>(<span class="kw-2">mut</span> <span class="ident">intervals</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TimeWindowSpan</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="ident">intervals</span>.<span class="ident">is_empty</span>() {
-        <span class="kw">return</span> <span class="prelude-val">None</span>;
+<span class="kw">fn</span> <span class="ident">get_operation_duration</span>(<span class="kw-2">mut</span> <span class="ident">intervals</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TimeWindowSpan</span><span class="op">&gt;</span>) -&gt; <span class="ident">Duration</span> {
+    <span class="ident">intervals</span>.<span class="ident">sort_unstable_by_key</span>(<span class="op">|</span><span class="ident">span</span><span class="op">|</span> <span class="ident">span</span>.<span class="ident">start</span>);
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">duration</span> <span class="op">=</span> <span class="ident">Duration::new</span>(<span class="number">0</span>, <span class="number">0</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_end</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+
+    <span class="kw">for</span> <span class="kw-2">mut</span> <span class="ident">interval</span> <span class="kw">in</span> <span class="ident">intervals</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cutoff</span>) <span class="op">=</span> <span class="ident">last_end</span> {
+            <span class="comment">// ensure the current interval doesn&#39;t overlap with the last one</span>
+            <span class="ident">interval</span> <span class="op">=</span> <span class="ident">TimeWindowSpan::new</span>(<span class="ident">interval</span>.<span class="ident">start</span>.<span class="ident">max</span>(<span class="ident">cutoff</span>), <span class="ident">interval</span>.<span class="ident">end</span>.<span class="ident">max</span>(<span class="ident">cutoff</span>));
+        }
+
+        <span class="ident">duration</span> <span class="op">+</span><span class="op">=</span> <span class="ident">interval</span>.<span class="ident">duration</span>();
+        <span class="ident">last_end</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">interval</span>.<span class="ident">end</span>);
     }
 
-    <span class="comment">// sort by start_timestamp in ascending order</span>
-    <span class="ident">intervals</span>.<span class="ident">sort_unstable_by_key</span>(<span class="op">|</span><span class="ident">span</span><span class="op">|</span> <span class="ident">span</span>.<span class="ident">start_timestamp</span>);
-
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">op_time_spent</span> <span class="op">=</span> <span class="number">0.0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">previous_interval</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TimeWindowSpan</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-
-    <span class="kw">for</span> <span class="ident">current_interval</span> <span class="kw">in</span> <span class="ident">intervals</span>.<span class="ident">into_iter</span>() {
-        <span class="kw">match</span> <span class="ident">previous_interval</span>.<span class="ident">as_mut</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">last_interval</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">last_interval</span>.<span class="ident">end_timestamp</span> <span class="op">&lt;</span> <span class="ident">current_interval</span>.<span class="ident">start_timestamp</span> {
-                    <span class="comment">// if current_interval does not overlap with last_interval,</span>
-                    <span class="comment">// then add last_interval to op_time_spent</span>
-                    <span class="ident">op_time_spent</span> <span class="op">+</span><span class="op">=</span> <span class="ident">last_interval</span>.<span class="ident">get_duration</span>();
-                    <span class="ident">previous_interval</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">current_interval</span>);
-                    <span class="kw">continue</span>;
-                }
-
-                <span class="comment">// current_interval and last_interval overlaps; so we merge these intervals</span>
-
-                <span class="comment">// invariant: last_interval.start_timestamp &lt;= current_interval.start_timestamp</span>
-
-                <span class="ident">last_interval</span>.<span class="ident">end_timestamp</span> <span class="op">=</span>
-                    <span class="ident">std::cmp::max</span>(<span class="ident">last_interval</span>.<span class="ident">end_timestamp</span>, <span class="ident">current_interval</span>.<span class="ident">end_timestamp</span>);
-            }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">previous_interval</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">current_interval</span>);
-            }
-        };
-    }
-
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">remaining_interval</span>) <span class="op">=</span> <span class="ident">previous_interval</span> {
-        <span class="ident">op_time_spent</span> <span class="op">+</span><span class="op">=</span> <span class="ident">remaining_interval</span>.<span class="ident">get_duration</span>();
-    }
-
-    <span class="prelude-val">Some</span>(<span class="ident">op_time_spent</span>)
+    <span class="ident">duration</span>
 }
 
 <span class="doccomment">/// Emit breakdowns that are derived using information from the given event.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">EmitBreakdowns</span> {
-    <span class="kw">fn</span> <span class="ident">emit_breakdowns</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Measurements</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">emit_breakdowns</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Measurements</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Configuration to define breakdowns based on span operation name.</span>
@@ -552,16 +470,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">EmitBreakdowns</span> <span class="kw">for</span> <span class="ident">SpanOperationsConfig</span> {
-    <span class="kw">fn</span> <span class="ident">emit_breakdowns</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Measurements</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">operation_name_breakdowns</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">matches</span>;
-
-        <span class="kw">if</span> <span class="ident">operation_name_breakdowns</span>.<span class="ident">is_empty</span>() {
+    <span class="kw">fn</span> <span class="ident">emit_breakdowns</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Measurements</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">matches</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
 
         <span class="kw">let</span> <span class="ident">spans</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">event</span>.<span class="ident">spans</span>.<span class="ident">value</span>() {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">spans</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">spans</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+            <span class="prelude-val">Some</span>(<span class="ident">spans</span>) =&gt; <span class="ident">spans</span>,
         };
 
         <span class="comment">// Generate span operation breakdowns</span>
@@ -569,42 +485,26 @@
 
         <span class="kw">for</span> <span class="ident">span</span> <span class="kw">in</span> <span class="ident">spans</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">span</span>.<span class="ident">value</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-                <span class="prelude-val">Some</span>(<span class="ident">span</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">span</span>,
+                <span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
+                <span class="prelude-val">Some</span>(<span class="ident">span</span>) =&gt; <span class="ident">span</span>,
             };
 
-            <span class="kw">let</span> <span class="ident">operation_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">span</span>.<span class="ident">op</span>.<span class="ident">value</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-                <span class="prelude-val">Some</span>(<span class="ident">span_op</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">span_op</span>,
+            <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">span</span>.<span class="ident">op</span>.<span class="ident">as_str</span>() {
+                <span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
+                <span class="prelude-val">Some</span>(<span class="ident">span_op</span>) =&gt; <span class="ident">span_op</span>,
             };
 
-            <span class="kw">let</span> <span class="ident">start_timestamp</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">span</span>.<span class="ident">start_timestamp</span>.<span class="ident">value</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-                <span class="prelude-val">Some</span>(<span class="ident">start_timestamp</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">start_timestamp</span>,
+            <span class="kw">let</span> <span class="ident">interval</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">span</span>.<span class="ident">start_timestamp</span>.<span class="ident">value</span>(), <span class="ident">span</span>.<span class="ident">timestamp</span>.<span class="ident">value</span>()) {
+                (<span class="prelude-val">Some</span>(<span class="ident">start</span>), <span class="prelude-val">Some</span>(<span class="ident">end</span>)) =&gt; <span class="ident">TimeWindowSpan::new</span>(<span class="kw-2">*</span><span class="ident">start</span>, <span class="kw-2">*</span><span class="ident">end</span>),
+                <span class="kw">_</span> =&gt; <span class="kw">continue</span>,
             };
 
-            <span class="kw">let</span> <span class="ident">end_timestamp</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">span</span>.<span class="ident">timestamp</span>.<span class="ident">value</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-                <span class="prelude-val">Some</span>(<span class="ident">end_timestamp</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">end_timestamp</span>,
+            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">matches</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">name</span>.<span class="ident">starts_with</span>(<span class="kw-2">*</span><span class="ident">n</span>)) {
+                <span class="prelude-val">Some</span>(<span class="ident">op_name</span>) =&gt; <span class="ident">OperationBreakdown::Emit</span>(<span class="ident">op_name</span>),
+                <span class="prelude-val">None</span> =&gt; <span class="ident">OperationBreakdown::DoNotEmit</span>(<span class="ident">name</span>),
             };
 
-            <span class="kw">let</span> <span class="ident">cover</span> <span class="op">=</span> <span class="ident">TimeWindowSpan::new</span>(<span class="kw-2">*</span><span class="ident">start_timestamp</span>, <span class="kw-2">*</span><span class="ident">end_timestamp</span>);
-
-            <span class="comment">// Only emit an operation breakdown measurement if the operation name matches any</span>
-            <span class="comment">// entries in operation_name_breakdown.</span>
-            <span class="kw">let</span> <span class="ident">results</span> <span class="op">=</span> <span class="ident">operation_name_breakdowns</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">find</span>(<span class="op">|</span><span class="ident">maybe</span><span class="op">|</span> <span class="ident">operation_name</span>.<span class="ident">starts_with</span>(<span class="kw-2">*</span><span class="ident">maybe</span>));
-
-            <span class="kw">let</span> <span class="ident">operation_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">results</span> {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">OperationBreakdown::DoNotEmit</span>(<span class="ident">operation_name</span>),
-                <span class="prelude-val">Some</span>(<span class="ident">operation_name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">OperationBreakdown::Emit</span>(<span class="ident">operation_name</span>),
-            };
-
-            <span class="ident">intervals</span>
-                .<span class="ident">entry</span>(<span class="ident">operation_name</span>)
-                .<span class="ident">or_insert_with</span>(<span class="ident">Vec::new</span>)
-                .<span class="ident">push</span>(<span class="ident">cover</span>);
+            <span class="ident">intervals</span>.<span class="ident">entry</span>(<span class="ident">key</span>).<span class="ident">or_insert_with</span>(<span class="ident">Vec::new</span>).<span class="ident">push</span>(<span class="ident">interval</span>);
         }
 
         <span class="kw">if</span> <span class="ident">intervals</span>.<span class="ident">is_empty</span>() {
@@ -612,38 +512,35 @@
         }
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">breakdown</span> <span class="op">=</span> <span class="ident">Measurements::default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">total_time</span> <span class="op">=</span> <span class="ident">Duration::new</span>(<span class="number">0</span>, <span class="number">0</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">total_time_spent</span> <span class="op">=</span> <span class="number">0.0</span>;
+        <span class="kw">for</span> (<span class="ident">key</span>, <span class="ident">intervals</span>) <span class="kw">in</span> <span class="ident">intervals</span> {
+            <span class="kw">if</span> <span class="ident">intervals</span>.<span class="ident">is_empty</span>() {
+                <span class="kw">continue</span>;
+            }
 
-        <span class="kw">for</span> (<span class="ident">operation_name</span>, <span class="ident">intervals</span>) <span class="kw">in</span> <span class="ident">intervals</span> {
-            <span class="kw">let</span> <span class="ident">op_time_spent</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">get_op_time_spent</span>(<span class="ident">intervals</span>) {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-                <span class="prelude-val">Some</span>(<span class="ident">op_time_spent</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">op_time_spent</span>,
+            <span class="kw">let</span> <span class="ident">op_duration</span> <span class="op">=</span> <span class="ident">get_operation_duration</span>(<span class="ident">intervals</span>);
+            <span class="ident">total_time</span> <span class="op">+</span><span class="op">=</span> <span class="ident">op_duration</span>;
+
+            <span class="kw">let</span> <span class="ident">operation_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">key</span> {
+                <span class="ident">OperationBreakdown::Emit</span>(<span class="ident">name</span>) =&gt; <span class="ident">name</span>,
+                <span class="ident">OperationBreakdown::DoNotEmit</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
             };
 
-            <span class="ident">total_time_spent</span> <span class="op">+</span><span class="op">=</span> <span class="ident">op_time_spent</span>;
-
-            <span class="kw">let</span> <span class="ident">operation_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">operation_name</span> {
-                <span class="ident">OperationBreakdown::DoNotEmit</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-                <span class="ident">OperationBreakdown::Emit</span>(<span class="ident">operation_name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">operation_name</span>,
-            };
-
-            <span class="kw">let</span> <span class="ident">time_spent_measurement</span> <span class="op">=</span> <span class="ident">Measurement</span> {
-                <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="ident">op_time_spent</span>),
+            <span class="kw">let</span> <span class="ident">op_value</span> <span class="op">=</span> <span class="ident">Measurement</span> {
+                <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="ident">relay_common::duration_to_millis</span>(<span class="ident">op_duration</span>)),
+                <span class="ident">unit</span>: <span class="ident">Annotated::new</span>(<span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::MilliSecond</span>)),
             };
 
             <span class="kw">let</span> <span class="ident">op_breakdown_name</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;ops.{}&quot;</span>, <span class="ident">operation_name</span>);
-
-            <span class="ident">breakdown</span>.<span class="ident">insert</span>(<span class="ident">op_breakdown_name</span>, <span class="ident">Annotated::new</span>(<span class="ident">time_spent_measurement</span>));
+            <span class="ident">breakdown</span>.<span class="ident">insert</span>(<span class="ident">op_breakdown_name</span>, <span class="ident">Annotated::new</span>(<span class="ident">op_value</span>));
         }
 
-        <span class="kw">let</span> <span class="ident">total_time_spent_measurement</span> <span class="op">=</span> <span class="ident">Measurement</span> {
-            <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="ident">total_time_spent</span>),
-        };
-        <span class="ident">breakdown</span>.<span class="ident">insert</span>(
-            <span class="string">&quot;total.time&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="ident">Annotated::new</span>(<span class="ident">total_time_spent_measurement</span>),
-        );
+        <span class="kw">let</span> <span class="ident">total_time_value</span> <span class="op">=</span> <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
+            <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="ident">relay_common::duration_to_millis</span>(<span class="ident">total_time</span>)),
+            <span class="ident">unit</span>: <span class="ident">Annotated::new</span>(<span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::MilliSecond</span>)),
+        });
+        <span class="ident">breakdown</span>.<span class="ident">insert</span>(<span class="string">&quot;total.time&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">total_time_value</span>);
 
         <span class="prelude-val">Some</span>(<span class="ident">breakdown</span>)
     }
@@ -660,10 +557,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">EmitBreakdowns</span> <span class="kw">for</span> <span class="ident">BreakdownConfig</span> {
-    <span class="kw">fn</span> <span class="ident">emit_breakdowns</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Measurements</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">emit_breakdowns</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Measurements</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">BreakdownConfig::SpanOperations</span>(<span class="ident">config</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">config</span>.<span class="ident">emit_breakdowns</span>(<span class="ident">event</span>),
-            <span class="ident">BreakdownConfig::Unsupported</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">BreakdownConfig::SpanOperations</span>(<span class="ident">config</span>) =&gt; <span class="ident">config</span>.<span class="ident">emit_breakdowns</span>(<span class="ident">event</span>),
+            <span class="ident">BreakdownConfig::Unsupported</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
@@ -681,58 +578,66 @@
 <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">BreakdownsConfig</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">BreakdownName</span>, <span class="ident">BreakdownConfig</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Target</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normalize_breakdowns</span>(<span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Event</span>, <span class="ident">breakdowns_config</span>: <span class="kw-2">&amp;</span><span class="ident">BreakdownsConfig</span>) {
-    <span class="kw">if</span> <span class="ident">breakdowns_config</span>.<span class="ident">is_empty</span>() {
-        <span class="kw">return</span>;
-    }
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_breakdown_measurements</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+    <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Event</span>,
+    <span class="ident">breakdowns_config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">BreakdownsConfig</span>,
+) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">Measurements</span>)<span class="op">&gt;</span> {
+    <span class="ident">breakdowns_config</span>
+        .<span class="ident">iter</span>()
+        .<span class="ident">filter_map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">breakdown_name</span>, <span class="ident">breakdown_config</span>)<span class="op">|</span> {
+            <span class="comment">// TODO: move this to deserialization in a follow-up.</span>
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">Breakdowns::is_valid_breakdown_name</span>(<span class="ident">breakdown_name</span>) {
+                <span class="kw">return</span> <span class="prelude-val">None</span>;
+            }
 
-    <span class="kw">for</span> (<span class="ident">breakdown_name</span>, <span class="ident">breakdown_config</span>) <span class="kw">in</span> <span class="ident">breakdowns_config</span>.<span class="ident">iter</span>() {
-        <span class="comment">// TODO: move this to deserialization in a follow-up.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">Breakdowns::is_valid_breakdown_name</span>(<span class="kw-2">&amp;</span><span class="ident">breakdown_name</span>) {
-            <span class="kw">continue</span>;
-        }
+            <span class="kw">let</span> <span class="ident">measurements</span> <span class="op">=</span> <span class="ident">breakdown_config</span>.<span class="ident">emit_breakdowns</span>(<span class="ident">event</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">breakdown</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">breakdown_config</span>.<span class="ident">emit_breakdowns</span>(<span class="ident">event</span>) {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">breakdown</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">breakdown</span>,
-        };
+            <span class="kw">if</span> <span class="ident">measurements</span>.<span class="ident">is_empty</span>() {
+                <span class="kw">return</span> <span class="prelude-val">None</span>;
+            }
 
-        <span class="kw">if</span> <span class="ident">breakdown</span>.<span class="ident">is_empty</span>() {
-            <span class="kw">continue</span>;
-        }
+            <span class="prelude-val">Some</span>((<span class="ident">breakdown_name</span>.<span class="ident">as_str</span>(), <span class="ident">measurements</span>))
+        })
+}
 
-        <span class="kw">let</span> <span class="ident">breakdowns</span> <span class="op">=</span> <span class="ident">event</span>
-            .<span class="ident">breakdowns</span>
-            .<span class="ident">value_mut</span>()
-            .<span class="ident">get_or_insert_with</span>(<span class="ident">Breakdowns::default</span>);
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normalize_breakdowns</span>(<span class="ident">event</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Event</span>, <span class="ident">breakdowns_config</span>: <span class="kw-2">&amp;</span><span class="ident">BreakdownsConfig</span>) {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">event_breakdowns</span> <span class="op">=</span> <span class="ident">Breakdowns::default</span>();
 
-        <span class="kw">let</span> <span class="ident">span_ops_breakdown</span> <span class="op">=</span> <span class="ident">breakdowns</span>
-            .<span class="ident">entry</span>(<span class="ident">breakdown_name</span>.<span class="ident">clone</span>())
+    <span class="kw">for</span> (<span class="ident">breakdown_name</span>, <span class="ident">breakdown</span>) <span class="kw">in</span> <span class="ident">get_breakdown_measurements</span>(<span class="ident">event</span>, <span class="ident">breakdowns_config</span>) {
+        <span class="ident">event_breakdowns</span>
+            .<span class="ident">entry</span>(<span class="ident">breakdown_name</span>.<span class="ident">to_owned</span>())
             .<span class="ident">or_insert_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Annotated::new</span>(<span class="ident">Measurements::default</span>()))
             .<span class="ident">value_mut</span>()
-            .<span class="ident">get_or_insert_with</span>(<span class="ident">Measurements::default</span>);
+            .<span class="ident">get_or_insert_with</span>(<span class="ident">Measurements::default</span>)
+            .<span class="ident">extend</span>(<span class="ident">breakdown</span>.<span class="ident">into_inner</span>());
+    }
 
-        <span class="ident">span_ops_breakdown</span>.<span class="ident">extend</span>(<span class="ident">breakdown</span>.<span class="ident">into_inner</span>());
+    <span class="comment">// Do not accept SDK-defined breakdowns. This is required for idempotency in multiple layers of</span>
+    <span class="comment">// Relay, and also such that performance metrics extraction produces the correct data.</span>
+    <span class="kw">if</span> <span class="ident">event_breakdowns</span>.<span class="ident">is_empty</span>() {
+        <span class="ident">event</span>.<span class="ident">breakdowns</span> <span class="op">=</span> <span class="ident">Annotated::empty</span>();
+    } <span class="kw">else</span> {
+        <span class="ident">event</span>.<span class="ident">breakdowns</span> <span class="op">=</span> <span class="ident">Annotated::new</span>(<span class="ident">event_breakdowns</span>);
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::protocol</span>::{<span class="ident">EventType</span>, <span class="ident">Span</span>, <span class="ident">SpanId</span>, <span class="ident">SpanStatus</span>, <span class="ident">TraceId</span>};
-    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::types::Object</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::protocol</span>::{<span class="ident">EventType</span>, <span class="ident">Span</span>, <span class="ident">SpanId</span>, <span class="ident">SpanStatus</span>, <span class="ident">TraceId</span>};
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types::Object</span>;
     <span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">TimeZone</span>, <span class="ident">Utc</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_skip_with_empty_breakdowns_config</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">Event::default</span>();
-        <span class="ident">normalize_breakdowns</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">BreakdownsConfig::default</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">event</span>.<span class="ident">breakdowns</span>.<span class="ident">value</span>(), <span class="prelude-val">None</span>);
+        <span class="ident">normalize_breakdowns</span>(<span class="kw-2">&amp;mut</span> <span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">BreakdownsConfig::default</span>());
+        <span class="macro">assert_eq_dbg!</span>(<span class="ident">event</span>.<span class="ident">breakdowns</span>.<span class="ident">value</span>(), <span class="prelude-val">None</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -744,6 +649,7 @@
                 <span class="string">&quot;lcp&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
                     <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="number">420.69</span>),
+                    <span class="ident">unit</span>: <span class="ident">Annotated::empty</span>(),
                 }),
             );
 
@@ -755,23 +661,23 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">Event</span> {
             <span class="ident">ty</span>: <span class="ident">EventType::Transaction</span>.<span class="ident">into</span>(),
-            <span class="ident">breakdowns</span>: <span class="ident">breakdowns</span>.<span class="ident">clone</span>().<span class="ident">into</span>(),
+            <span class="ident">breakdowns</span>: <span class="ident">breakdowns</span>.<span class="ident">into</span>(),
             ..<span class="ident">Default::default</span>()
         };
-        <span class="ident">normalize_breakdowns</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">BreakdownsConfig::default</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">event</span>.<span class="ident">breakdowns</span>.<span class="ident">into_value</span>().<span class="ident">unwrap</span>(), <span class="ident">breakdowns</span>);
+        <span class="ident">normalize_breakdowns</span>(<span class="kw-2">&amp;mut</span> <span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">BreakdownsConfig::default</span>());
+        <span class="macro">assert_eq_dbg!</span>(<span class="ident">event</span>.<span class="ident">breakdowns</span>.<span class="ident">into_value</span>(), <span class="prelude-val">None</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_emit_ops_breakdown</span>() {
         <span class="kw">fn</span> <span class="ident">make_span</span>(
-            <span class="ident">start_timestamp</span>: <span class="ident">Annotated</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-            <span class="ident">end_timestamp</span>: <span class="ident">Annotated</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
+            <span class="ident">start</span>: <span class="ident">Annotated</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
+            <span class="ident">end</span>: <span class="ident">Annotated</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
             <span class="ident">op_name</span>: <span class="ident">String</span>,
-        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Annotated</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">Annotated</span><span class="op">&lt;</span><span class="ident">Span</span><span class="op">&gt;</span> {
             <span class="ident">Annotated::new</span>(<span class="ident">Span</span> {
-                <span class="ident">timestamp</span>: <span class="ident">end_timestamp</span>,
-                <span class="ident">start_timestamp</span>,
+                <span class="ident">timestamp</span>: <span class="ident">end</span>,
+                <span class="ident">start_timestamp</span>: <span class="ident">start</span>,
                 <span class="ident">description</span>: <span class="ident">Annotated::new</span>(<span class="string">&quot;desc&quot;</span>.<span class="ident">to_owned</span>()),
                 <span class="ident">op</span>: <span class="ident">Annotated::new</span>(<span class="ident">op_name</span>),
                 <span class="ident">trace_id</span>: <span class="ident">Annotated::new</span>(<span class="ident">TraceId</span>(<span class="string">&quot;4c79f60c11214eb38604f4ae0781bfb2&quot;</span>.<span class="ident">into</span>())),
@@ -813,22 +719,6 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">Event</span> {
             <span class="ident">ty</span>: <span class="ident">EventType::Transaction</span>.<span class="ident">into</span>(),
             <span class="ident">spans</span>: <span class="ident">spans</span>.<span class="ident">into</span>(),
-            <span class="ident">breakdowns</span>: <span class="ident">Breakdowns</span>({
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">span_ops_breakdown</span> <span class="op">=</span> <span class="ident">Measurements::default</span>();
-
-                <span class="ident">span_ops_breakdown</span>.<span class="ident">insert</span>(
-                    <span class="string">&quot;lcp&quot;</span>.<span class="ident">to_owned</span>(),
-                    <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
-                        <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="number">420.69</span>),
-                    }),
-                );
-
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">breakdowns</span> <span class="op">=</span> <span class="ident">Object::new</span>();
-                <span class="ident">breakdowns</span>.<span class="ident">insert</span>(<span class="string">&quot;span_ops&quot;</span>.<span class="ident">to_owned</span>(), <span class="ident">Annotated::new</span>(<span class="ident">span_ops_breakdown</span>));
-
-                <span class="ident">breakdowns</span>
-            })
-            .<span class="ident">into</span>(),
             ..<span class="ident">Default::default</span>()
         };
 
@@ -845,7 +735,7 @@
             <span class="ident">config</span>
         });
 
-        <span class="ident">normalize_breakdowns</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">breakdowns_config</span>);
+        <span class="ident">normalize_breakdowns</span>(<span class="kw-2">&amp;mut</span> <span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">breakdowns_config</span>);
 
         <span class="kw">let</span> <span class="ident">expected_breakdowns</span> <span class="op">=</span> <span class="ident">Breakdowns</span>({
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">span_ops_breakdown</span> <span class="op">=</span> <span class="ident">Measurements::default</span>();
@@ -855,6 +745,7 @@
                 <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
                     <span class="comment">// 1 hour in milliseconds</span>
                     <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="number">3_600_000.0</span>),
+                    <span class="ident">unit</span>: <span class="ident">Annotated::new</span>(<span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::MilliSecond</span>)),
                 }),
             );
 
@@ -863,6 +754,7 @@
                 <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
                     <span class="comment">// 2 hours in milliseconds</span>
                     <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="number">7_200_000.0</span>),
+                    <span class="ident">unit</span>: <span class="ident">Annotated::new</span>(<span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::MilliSecond</span>)),
                 }),
             );
 
@@ -871,6 +763,7 @@
                 <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
                     <span class="comment">// 4 hours and 10 microseconds in milliseconds</span>
                     <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="number">14_400_000.01</span>),
+                    <span class="ident">unit</span>: <span class="ident">Annotated::new</span>(<span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::MilliSecond</span>)),
                 }),
             );
 
@@ -880,20 +773,14 @@
                 <span class="ident">Annotated::new</span>(<span class="ident">span_ops_breakdown</span>.<span class="ident">clone</span>()),
             );
 
-            <span class="ident">span_ops_breakdown</span>.<span class="ident">insert</span>(
-                <span class="string">&quot;lcp&quot;</span>.<span class="ident">to_owned</span>(),
-                <span class="ident">Annotated::new</span>(<span class="ident">Measurement</span> {
-                    <span class="ident">value</span>: <span class="ident">Annotated::new</span>(<span class="number">420.69</span>),
-                }),
-            );
             <span class="ident">breakdowns</span>.<span class="ident">insert</span>(<span class="string">&quot;span_ops&quot;</span>.<span class="ident">to_owned</span>(), <span class="ident">Annotated::new</span>(<span class="ident">span_ops_breakdown</span>));
 
             <span class="ident">breakdowns</span>
         });
 
-        <span class="macro">assert_eq!</span>(<span class="ident">event</span>.<span class="ident">breakdowns</span>.<span class="ident">into_value</span>().<span class="ident">unwrap</span>(), <span class="ident">expected_breakdowns</span>);
+        <span class="macro">assert_eq_dbg!</span>(<span class="ident">event</span>.<span class="ident">breakdowns</span>.<span class="ident">into_value</span>().<span class="ident">unwrap</span>(), <span class="ident">expected_breakdowns</span>);
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="relay_general" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
-    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="relay_general" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</body></html>

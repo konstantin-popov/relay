@@ -1,103 +1,109 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `relay-metrics/src/protocol.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>protocol.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../relay_metrics/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `relay-metrics/src/protocol.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>protocol.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../relay_metrics/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../relay_metrics/index.html"><div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../relay_metrics/index.html">
+                        <img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -754,8 +760,18 @@
 <span id="753">753</span>
 <span id="754">754</span>
 <span id="755">755</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
 <span class="kw">use</span> <span class="ident">std::iter::FusedIterator</span>;
 
@@ -764,87 +780,10 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">relay_common::UnixTimestamp</span>;
 
-<span class="doccomment">/// Time duration units used in [`MetricUnit::Duration`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Defaults to `ms`.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Hash</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DurationPrecision</span> {
-    <span class="doccomment">/// Nanosecond (`&quot;ns&quot;`).</span>
-    <span class="ident">NanoSecond</span>,
-    <span class="doccomment">/// Millisecond (`&quot;ms&quot;`).</span>
-    <span class="ident">MilliSecond</span>,
-    <span class="doccomment">/// Full second (`&quot;s&quot;`).</span>
-    <span class="ident">Second</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">DurationPrecision</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::MilliSecond</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">DurationPrecision</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::NanoSecond</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;ns&quot;</span>),
-            <span class="self">Self</span><span class="ident">::MilliSecond</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;ms&quot;</span>),
-            <span class="self">Self</span><span class="ident">::Second</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;s&quot;</span>),
-        }
-    }
-}
-
-<span class="doccomment">/// The [unit](Metric::unit) of measurement of a metric [value](Metric::value).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Units augment metric values by giving them a magnitude and semantics. There are certain types of</span>
-<span class="doccomment">/// units that are subdivided in their precision, such as the [`DurationPrecision`] for time</span>
-<span class="doccomment">/// measurements.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Units and their precisions are uniquely represented by a string identifier.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Hash</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MetricUnit</span> {
-    <span class="doccomment">/// A time duration, defaulting to milliseconds (`&quot;ms&quot;`).</span>
-    <span class="ident">Duration</span>(<span class="ident">DurationPrecision</span>),
-    <span class="doccomment">/// Untyped value without a unit (`&quot;&quot;`).</span>
-    <span class="prelude-val">None</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">MetricUnit</span> {
-    <span class="doccomment">/// Returns `true` if the metric_unit is [`None`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_none</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="macro">matches!</span>(<span class="self">self</span>, <span class="self">Self</span><span class="ident">::None</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MetricUnit</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">MetricUnit::None</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">MetricUnit</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">MetricUnit::Duration</span>(<span class="ident">precision</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">precision</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
-            <span class="ident">MetricUnit::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;&quot;</span>),
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">std::str::FromStr</span> <span class="kw">for</span> <span class="ident">MetricUnit</span> {
-    <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">ParseMetricError</span>;
-
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="self">Self</span><span class="ident">::Err</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">s</span> {
-            <span class="string">&quot;ns&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Duration</span>(<span class="ident">DurationPrecision::NanoSecond</span>),
-            <span class="string">&quot;ms&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Duration</span>(<span class="ident">DurationPrecision::MilliSecond</span>),
-            <span class="string">&quot;s&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Duration</span>(<span class="ident">DurationPrecision::Second</span>),
-            <span class="string">&quot;&quot;</span> <span class="op">|</span> <span class="string">&quot;unit&quot;</span> <span class="op">|</span> <span class="string">&quot;none&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::None</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseMetricError</span>(())),
-        })
-    }
-}
-
-<span class="macro">relay_common::impl_str_serde!</span>(<span class="ident">MetricUnit</span>, <span class="string">&quot;a metric unit string&quot;</span>);
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">relay_common</span>::{
+    <span class="ident">CustomUnit</span>, <span class="ident">DurationUnit</span>, <span class="ident">FractionUnit</span>, <span class="ident">InformationUnit</span>, <span class="ident">MetricUnit</span>, <span class="ident">ParseMetricUnitError</span>,
+};
 
 <span class="doccomment">/// The [typed value](Metric::value) of a metric.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>)]</span>
@@ -870,33 +809,33 @@
 
 <span class="kw">impl</span> <span class="ident">MetricValue</span> {
     <span class="doccomment">/// Creates a [`MetricValue::Set`] from the given string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_from_str</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::Set</span>(<span class="ident">hash_set_value</span>(<span class="ident">string</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_from_str</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::Set</span>(<span class="ident">hash_set_value</span>(<span class="ident">string</span>))
     }
 
     <span class="doccomment">/// Creates a [`MetricValue::Set`] from any type that implements `Display`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_from_display</span>(<span class="ident">display</span>: <span class="kw">impl</span> <span class="ident">fmt::Display</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::set_from_str</span>(<span class="kw-2">&amp;</span><span class="ident">display</span>.<span class="ident">to_string</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_from_display</span>(<span class="ident">display</span>: <span class="kw">impl</span> <span class="ident">fmt::Display</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::set_from_str</span>(<span class="kw-2">&amp;</span><span class="ident">display</span>.<span class="ident">to_string</span>())
     }
 
     <span class="doccomment">/// Returns the type of this value.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MetricType</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">MetricType</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Counter</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricType::Counter</span>,
-            <span class="self">Self</span><span class="ident">::Distribution</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricType::Distribution</span>,
-            <span class="self">Self</span><span class="ident">::Set</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricType::Set</span>,
-            <span class="self">Self</span><span class="ident">::Gauge</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricType::Gauge</span>,
+            <span class="ident"><span class="self">Self</span>::Counter</span>(<span class="kw">_</span>) =&gt; <span class="ident">MetricType::Counter</span>,
+            <span class="ident"><span class="self">Self</span>::Distribution</span>(<span class="kw">_</span>) =&gt; <span class="ident">MetricType::Distribution</span>,
+            <span class="ident"><span class="self">Self</span>::Set</span>(<span class="kw">_</span>) =&gt; <span class="ident">MetricType::Set</span>,
+            <span class="ident"><span class="self">Self</span>::Gauge</span>(<span class="kw">_</span>) =&gt; <span class="ident">MetricType::Gauge</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">MetricValue</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">MetricValue::Counter</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
-            <span class="ident">MetricValue::Distribution</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
-            <span class="ident">MetricValue::Set</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
-            <span class="ident">MetricValue::Gauge</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
+            <span class="ident">MetricValue::Counter</span>(<span class="ident">value</span>) =&gt; <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
+            <span class="ident">MetricValue::Distribution</span>(<span class="ident">value</span>) =&gt; <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
+            <span class="ident">MetricValue::Set</span>(<span class="ident">value</span>) =&gt; <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
+            <span class="ident">MetricValue::Gauge</span>(<span class="ident">value</span>) =&gt; <span class="ident">value</span>.<span class="ident">fmt</span>(<span class="ident">f</span>),
         }
     }
 }
@@ -928,27 +867,34 @@
     <span class="ident">Gauge</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">MetricType</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+<span class="kw">impl</span> <span class="ident">MetricType</span> {
+    <span class="doccomment">/// Return the shortcode for this metric type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">MetricType::Counter</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;c&quot;</span>),
-            <span class="ident">MetricType::Distribution</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;d&quot;</span>),
-            <span class="ident">MetricType::Set</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;s&quot;</span>),
-            <span class="ident">MetricType::Gauge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;g&quot;</span>),
+            <span class="ident">MetricType::Counter</span> =&gt; <span class="string">&quot;c&quot;</span>,
+            <span class="ident">MetricType::Distribution</span> =&gt; <span class="string">&quot;d&quot;</span>,
+            <span class="ident">MetricType::Set</span> =&gt; <span class="string">&quot;s&quot;</span>,
+            <span class="ident">MetricType::Gauge</span> =&gt; <span class="string">&quot;g&quot;</span>,
         }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">MetricType</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
+        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="self">self</span>.<span class="ident">as_str</span>())
     }
 }
 
 <span class="kw">impl</span> <span class="ident">std::str::FromStr</span> <span class="kw">for</span> <span class="ident">MetricType</span> {
     <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">ParseMetricError</span>;
 
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="self">Self</span><span class="ident">::Err</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">s</span> {
-            <span class="string">&quot;c&quot;</span> <span class="op">|</span> <span class="string">&quot;m&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Counter</span>,
-            <span class="string">&quot;h&quot;</span> <span class="op">|</span> <span class="string">&quot;d&quot;</span> <span class="op">|</span> <span class="string">&quot;ms&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Distribution</span>,
-            <span class="string">&quot;s&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Set</span>,
-            <span class="string">&quot;g&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Gauge</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseMetricError</span>(())),
+            <span class="string">&quot;c&quot;</span> <span class="op">|</span> <span class="string">&quot;m&quot;</span> =&gt; <span class="ident"><span class="self">Self</span>::Counter</span>,
+            <span class="string">&quot;h&quot;</span> <span class="op">|</span> <span class="string">&quot;d&quot;</span> <span class="op">|</span> <span class="string">&quot;ms&quot;</span> =&gt; <span class="ident"><span class="self">Self</span>::Distribution</span>,
+            <span class="string">&quot;s&quot;</span> =&gt; <span class="ident"><span class="self">Self</span>::Set</span>,
+            <span class="string">&quot;g&quot;</span> =&gt; <span class="ident"><span class="self">Self</span>::Gauge</span>,
+            <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseMetricError</span>(())),
         })
     }
 }
@@ -960,30 +906,68 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ParseMetricError</span>(());
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">ParseMetricError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;failed to parse metric&quot;</span>)
     }
 }
 
-<span class="doccomment">/// Validates a metric name.</span>
+<span class="doccomment">/// Validates a metric name. This is the statsd name, i.e. without type or unit.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Metric names cannot be empty, must begin with a letter and can consist of ASCII alphanumerics,</span>
-<span class="doccomment">/// underscores and periods.</span>
-<span class="kw">fn</span> <span class="ident">is_valid_name</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="doccomment">/// underscores, slashes and periods.</span>
+<span class="kw">fn</span> <span class="ident">is_valid_name</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">as_bytes</span>().<span class="ident">iter</span>();
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">first_byte</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>() {
         <span class="kw">if</span> <span class="ident">first_byte</span>.<span class="ident">is_ascii_alphabetic</span>() {
-            <span class="kw">return</span> <span class="ident">iter</span>.<span class="ident">all</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span>.<span class="ident">is_ascii_alphanumeric</span>() <span class="op">|</span><span class="op">|</span> <span class="macro">matches!</span>(<span class="ident">b</span>, <span class="string">b&#39;.&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span>));
+            <span class="kw">return</span> <span class="ident">iter</span>.<span class="ident">all</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span>.<span class="ident">is_ascii_alphanumeric</span>() <span class="op">|</span><span class="op">|</span> <span class="macro">matches!</span>(<span class="ident">b</span>, <span class="string">b&#39;.&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;/&#39;</span>));
         }
     }
     <span class="bool-val">false</span>
+}
+
+<span class="doccomment">/// Validates an MRI of the form `&lt;ty&gt;:&lt;ns&gt;/&lt;name&gt;@&lt;unit&gt;`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Note that the format used in the statsd protocol is different: Metric names are not prefixed</span>
+<span class="doccomment">/// with `&lt;ty&gt;:` as the type is somewhere else in the protocol.</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_valid_mri</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">name</span>.<span class="ident">splitn</span>(<span class="number">2</span>, <span class="string">&#39;:&#39;</span>);
+    <span class="kw">if</span> <span class="ident">components</span>.<span class="ident">next</span>().<span class="ident">is_none</span>() {
+        <span class="kw">return</span> <span class="bool-val">false</span>;
+    }
+
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name_unit</span>) <span class="op">=</span> <span class="ident">components</span>.<span class="ident">next</span>() {
+        <span class="ident">parse_name_unit</span>(<span class="ident">name_unit</span>).<span class="ident">is_some</span>()
+    } <span class="kw">else</span> {
+        <span class="bool-val">false</span>
+    }
+}
+
+<span class="doccomment">/// Validates a tag key.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Tag keys currently only need to not contain ASCII control characters. This might change.</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_valid_tag_key</span>(<span class="ident">tag_key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+    <span class="comment">// iterating over bytes produces better asm, and we&#39;re only checking for ascii chars</span>
+    <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">byte</span> <span class="kw">in</span> <span class="ident">tag_key</span>.<span class="ident">as_bytes</span>() {
+        <span class="kw">if</span> (<span class="ident">byte</span> <span class="kw">as</span> <span class="ident">char</span>).<span class="ident">is_ascii_control</span>() {
+            <span class="kw">return</span> <span class="bool-val">false</span>;
+        }
+    }
+    <span class="bool-val">true</span>
+}
+
+<span class="doccomment">/// Validates a tag value.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Tag values are never entirely rejected, but invalid characters (ASCII control characters) are</span>
+<span class="doccomment">/// stripped out.</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">validate_tag_value</span>(<span class="ident">tag_value</span>: <span class="kw-2">&amp;mut</span> <span class="ident">String</span>) {
+    <span class="ident">tag_value</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="op">!</span><span class="ident">c</span>.<span class="ident">is_ascii_control</span>());
 }
 
 <span class="doccomment">/// Parses the `name[@unit]` part of a metric string.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns [`MetricUnit::None`] if no unit is specified. Returns `None` if the name or value are</span>
 <span class="doccomment">/// invalid.</span>
-<span class="kw">fn</span> <span class="ident">parse_name_unit</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">MetricUnit</span>)<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_name_unit</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">MetricUnit</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">split</span>(<span class="string">&#39;@&#39;</span>);
     <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">next</span>()<span class="question-mark">?</span>;
     <span class="kw">if</span> <span class="op">!</span><span class="ident">is_valid_name</span>(<span class="ident">name</span>) {
@@ -991,8 +975,8 @@
     }
 
     <span class="kw">let</span> <span class="ident">unit</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">components</span>.<span class="ident">next</span>() {
-        <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>,
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricUnit::default</span>(),
+        <span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>,
+        <span class="prelude-val">None</span> =&gt; <span class="ident">MetricUnit::default</span>(),
     };
 
     <span class="prelude-val">Some</span>((<span class="ident">name</span>.<span class="ident">to_owned</span>(), <span class="ident">unit</span>))
@@ -1002,7 +986,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Sets only guarantee 32-bit accuracy, but arbitrary strings are allowed on the protocol. Upon</span>
 <span class="doccomment">/// parsing, they are hashed and only used as hashes subsequently.</span>
-<span class="kw">fn</span> <span class="ident">hash_set_value</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+<span class="kw">fn</span> <span class="ident">hash_set_value</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">u32</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hasher</span> <span class="op">=</span> <span class="ident">FnvHasher::default</span>();
     <span class="ident">hasher</span>.<span class="ident">write</span>(<span class="ident">string</span>.<span class="ident">as_bytes</span>());
     <span class="ident">hasher</span>.<span class="ident">finish</span>()
@@ -1011,14 +995,14 @@
 <span class="doccomment">/// Parses a metric value given its type.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns `None` if the value is invalid for the given type.</span>
-<span class="kw">fn</span> <span class="ident">parse_value</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">ty</span>: <span class="ident">MetricType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MetricValue</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_value</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">ty</span>: <span class="ident">MetricType</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MetricValue</span><span class="op">&gt;</span> {
     <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">ty</span> {
-        <span class="ident">MetricType::Counter</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricValue::Counter</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>),
-        <span class="ident">MetricType::Distribution</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricValue::Distribution</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>),
-        <span class="ident">MetricType::Set</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">MetricType::Counter</span> =&gt; <span class="ident">MetricValue::Counter</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>),
+        <span class="ident">MetricType::Distribution</span> =&gt; <span class="ident">MetricValue::Distribution</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>),
+        <span class="ident">MetricType::Set</span> =&gt; {
             <span class="ident">MetricValue::Set</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">hash_set_value</span>(<span class="ident">string</span>)))
         }
-        <span class="ident">MetricType::Gauge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricValue::Gauge</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>),
+        <span class="ident">MetricType::Gauge</span> =&gt; <span class="ident">MetricValue::Gauge</span>(<span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>),
     })
 }
 
@@ -1029,7 +1013,7 @@
 <span class="kw">fn</span> <span class="ident">parse_name_unit_value</span>(
     <span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">ty</span>: <span class="ident">MetricType</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">MetricUnit</span>, <span class="ident">MetricValue</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">MetricUnit</span>, <span class="ident">MetricValue</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">splitn</span>(<span class="number">2</span>, <span class="string">&#39;:&#39;</span>);
     <span class="kw">let</span> (<span class="ident">name</span>, <span class="ident">unit</span>) <span class="op">=</span> <span class="ident">components</span>.<span class="ident">next</span>().<span class="ident">and_then</span>(<span class="ident">parse_name_unit</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">next</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">parse_value</span>(<span class="ident">s</span>, <span class="ident">ty</span>))<span class="question-mark">?</span>;
@@ -1039,14 +1023,22 @@
 <span class="doccomment">/// Parses tags in the format `tag1,tag2:value`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Tag values are optional. For tags with missing values, an empty `&quot;&quot;` value is assumed.</span>
-<span class="kw">fn</span> <span class="ident">parse_tags</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_tags</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
 
     <span class="kw">for</span> <span class="ident">pair</span> <span class="kw">in</span> <span class="ident">string</span>.<span class="ident">split</span>(<span class="string">&#39;,&#39;</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">name_value</span> <span class="op">=</span> <span class="ident">pair</span>.<span class="ident">splitn</span>(<span class="number">2</span>, <span class="string">&#39;:&#39;</span>);
+
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">name_value</span>.<span class="ident">next</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">name_value</span>.<span class="ident">next</span>().<span class="ident">unwrap_or_default</span>();
-        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>(), <span class="ident">value</span>.<span class="ident">to_owned</span>());
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">is_valid_tag_key</span>(<span class="ident">name</span>) {
+            <span class="kw">continue</span>;
+        }
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">name_value</span>.<span class="ident">next</span>().<span class="ident">unwrap_or_default</span>().<span class="ident">to_owned</span>();
+
+        <span class="ident">validate_tag_value</span>(<span class="kw-2">&amp;mut</span> <span class="ident">value</span>);
+
+        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>(), <span class="ident">value</span>);
     }
 
     <span class="prelude-val">Some</span>(<span class="ident">map</span>)
@@ -1069,7 +1061,7 @@
 <span class="doccomment">/// submission looks like this:</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```text</span>
-<span class="doccomment">/// endpoint.response_time@ms:57|d|#route:user_index</span>
+<span class="doccomment">/// endpoint.response_time@millisecond:57|d|#route:user_index</span>
 <span class="doccomment">/// endpoint.hits:1|c|#route:user_index</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -1084,7 +1076,7 @@
 <span class="doccomment">/// ```json</span>
 <span class="doccomment">/// {</span>
 <span class="doccomment">///   &quot;name&quot;: &quot;endpoint.response_time&quot;,</span>
-<span class="doccomment">///   &quot;unit&quot;: &quot;ms&quot;,</span>
+<span class="doccomment">///   &quot;unit&quot;: &quot;millisecond&quot;,</span>
 <span class="doccomment">///   &quot;value&quot;: 57,</span>
 <span class="doccomment">///   &quot;type&quot;: &quot;d&quot;,</span>
 <span class="doccomment">///   &quot;timestamp&quot;: 1615889449,</span>
@@ -1121,13 +1113,13 @@
     <span class="doccomment">/// The name of the metric without its unit.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Metric names cannot be empty, must start with a letter and can consist of ASCII</span>
-    <span class="doccomment">/// alphanumerics, underscores and periods.</span>
+    <span class="doccomment">/// alphanumerics, underscores, slashes, @s and periods.</span>
     <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">String</span>,
     <span class="doccomment">/// The unit of the metric value.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Units augment metric values by giving them a magnitude and semantics. There are certain</span>
-    <span class="doccomment">/// types of units that are subdivided in their precision, such as the [`DurationPrecision`] for</span>
-    <span class="doccomment">/// time measurements.</span>
+    <span class="doccomment">/// types of units that are subdivided in their precision, such as the [`DurationUnit`] for time</span>
+    <span class="doccomment">/// measurements.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The unit can be omitted and defaults to [`MetricUnit::None`].</span>
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span>, <span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;MetricUnit::is_none&quot;</span>)]</span>
@@ -1157,7 +1149,28 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Metric</span> {
-    <span class="kw">fn</span> <span class="ident">parse_str</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Creates a new metric using the MRI naming format.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// MRI is the metric resource identifier in the format `&lt;type&gt;:&lt;ns&gt;/&lt;name&gt;@&lt;unit&gt;`. This name</span>
+    <span class="doccomment">/// ensures that just the name determines correct bucketing of metrics with name collisions.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_mri</span>(
+        <span class="ident">namespace</span>: <span class="kw">impl</span> <span class="ident">fmt::Display</span>,
+        <span class="ident">name</span>: <span class="kw">impl</span> <span class="ident">fmt::Display</span>,
+        <span class="ident">unit</span>: <span class="ident">MetricUnit</span>,
+        <span class="ident">value</span>: <span class="ident">MetricValue</span>,
+        <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>,
+        <span class="ident">tags</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">name</span>: <span class="macro">format!</span>(<span class="string">&quot;{}:{}/{}@{}&quot;</span>, <span class="ident">value</span>.<span class="ident">ty</span>(), <span class="ident">namespace</span>, <span class="ident">name</span>, <span class="ident">unit</span>),
+            <span class="ident">unit</span>,
+            <span class="ident">value</span>,
+            <span class="ident">timestamp</span>,
+            <span class="ident">tags</span>,
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">parse_str</span>(<span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">split</span>(<span class="string">&#39;|&#39;</span>);
 
         <span class="kw">let</span> <span class="ident">name_value_str</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">next</span>()<span class="question-mark">?</span>;
@@ -1165,7 +1178,7 @@
         <span class="kw">let</span> (<span class="ident">name</span>, <span class="ident">unit</span>, <span class="ident">value</span>) <span class="op">=</span> <span class="ident">parse_name_unit_value</span>(<span class="ident">name_value_str</span>, <span class="ident">ty</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">metric</span> <span class="op">=</span> <span class="self">Self</span> {
-            <span class="ident">name</span>,
+            <span class="ident">name</span>: <span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, <span class="ident">ty</span>, <span class="ident">name</span>),
             <span class="ident">unit</span>,
             <span class="ident">value</span>,
             <span class="ident">timestamp</span>,
@@ -1190,12 +1203,12 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use relay_metrics::{Metric, UnixTimestamp};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let metric = Metric::parse(b&quot;response_time@ms:57|d&quot;, UnixTimestamp::now())</span>
+    <span class="doccomment">/// let metric = Metric::parse(b&quot;response_time@millisecond:57|d&quot;, UnixTimestamp::now())</span>
     <span class="doccomment">///     .expect(&quot;metric should parse&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParseMetricError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParseMetricError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">std::str::from_utf8</span>(<span class="ident">slice</span>).<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">ParseMetricError</span>(())))<span class="question-mark">?</span>;
-        <span class="self">Self</span><span class="ident">::parse_str</span>(<span class="ident">string</span>, <span class="ident">timestamp</span>).<span class="ident">ok_or</span>(<span class="ident">ParseMetricError</span>(()))
+        <span class="ident"><span class="self">Self</span>::parse_str</span>(<span class="ident">string</span>, <span class="ident">timestamp</span>).<span class="ident">ok_or</span>(<span class="ident">ParseMetricError</span>(()))
     }
 
     <span class="doccomment">/// Parses a set of metric values from the raw protocol.</span>
@@ -1213,7 +1226,7 @@
     <span class="doccomment">/// use relay_metrics::{Metric, UnixTimestamp};</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let data = br#&quot;</span>
-    <span class="doccomment">/// endpoint.response_time@ms:57|d</span>
+    <span class="doccomment">/// endpoint.response_time@millisecond:57|d</span>
     <span class="doccomment">/// endpoint.hits:1|c</span>
     <span class="doccomment">/// &quot;#;</span>
     <span class="doccomment">///</span>
@@ -1222,7 +1235,7 @@
     <span class="doccomment">///     println!(&quot;Metric {}: {}&quot;, metric.name, metric.value);</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_all</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ParseMetrics</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_all</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">timestamp</span>: <span class="ident">UnixTimestamp</span>) -&gt; <span class="ident">ParseMetrics</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="ident">ParseMetrics</span> { <span class="ident">slice</span>, <span class="ident">timestamp</span> }
     }
 }
@@ -1235,7 +1248,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ParseMetrics</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[],
             <span class="comment">// The timestamp will never be returned.</span>
@@ -1247,19 +1260,19 @@
 <span class="kw">impl</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">ParseMetrics</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Metric</span>, <span class="ident">ParseMetricError</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">split</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">splitn</span>(<span class="number">2</span>, <span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="string">b&#39;\n&#39;</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">split</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">splitn</span>(<span class="number">2</span>, <span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span> <span class="op">==</span> <span class="string">b&#39;\n&#39;</span>);
             <span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="ident">split</span>.<span class="ident">next</span>()<span class="question-mark">?</span>;
             <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="ident">split</span>.<span class="ident">next</span>().<span class="ident">unwrap_or_default</span>();
 
             <span class="kw">let</span> <span class="ident">string</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">std::str::from_utf8</span>(<span class="ident">current</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">string</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">string</span>.<span class="ident">strip_suffix</span>(<span class="string">&#39;\r&#39;</span>).<span class="ident">unwrap_or</span>(<span class="ident">string</span>),
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">ParseMetricError</span>(()))),
+                <span class="prelude-val">Ok</span>(<span class="ident">string</span>) =&gt; <span class="ident">string</span>.<span class="ident">strip_suffix</span>(<span class="string">&#39;\r&#39;</span>).<span class="ident">unwrap_or</span>(<span class="ident">string</span>),
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">ParseMetricError</span>(()))),
             };
 
             <span class="kw">if</span> <span class="op">!</span><span class="ident">string</span>.<span class="ident">is_empty</span>() {
@@ -1276,6 +1289,12 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_sizeof_unit</span>() {
+        <span class="macro">assert_eq!</span>(<span class="ident">std::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">MetricUnit</span><span class="op">&gt;</span>(), <span class="number">16</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">std::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">MetricUnit</span><span class="op">&gt;</span>(), <span class="number">1</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_parse_garbage</span>() {
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;x23-408j17z4232@#34d\nc3456y7^😎&quot;</span>;
         <span class="kw">let</span> <span class="ident">timestamp</span> <span class="op">=</span> <span class="ident">UnixTimestamp::from_secs</span>(<span class="number">4711</span>);
@@ -1290,7 +1309,7 @@
         <span class="kw">let</span> <span class="ident">metric</span> <span class="op">=</span> <span class="ident">Metric::parse</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="ident">timestamp</span>).<span class="ident">unwrap</span>();
         <span class="macro">insta::assert_debug_snapshot!</span>(<span class="ident">metric</span>, @<span class="string">r###&quot;
         Metric {
-            name: &quot;foo&quot;,
+            name: &quot;c:foo&quot;,
             unit: None,
             value: Counter(
                 42.0,
@@ -1308,7 +1327,7 @@
         <span class="kw">let</span> <span class="ident">metric</span> <span class="op">=</span> <span class="ident">Metric::parse</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="ident">timestamp</span>).<span class="ident">unwrap</span>();
         <span class="macro">insta::assert_debug_snapshot!</span>(<span class="ident">metric</span>, @<span class="string">r###&quot;
         Metric {
-            name: &quot;foo&quot;,
+            name: &quot;d:foo&quot;,
             unit: None,
             value: Distribution(
                 17.5,
@@ -1334,7 +1353,7 @@
         <span class="kw">let</span> <span class="ident">metric</span> <span class="op">=</span> <span class="ident">Metric::parse</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="ident">timestamp</span>).<span class="ident">unwrap</span>();
         <span class="macro">insta::assert_debug_snapshot!</span>(<span class="ident">metric</span>, @<span class="string">r###&quot;
         Metric {
-            name: &quot;foo&quot;,
+            name: &quot;s:foo&quot;,
             unit: None,
             value: Set(
                 4267882815,
@@ -1352,7 +1371,7 @@
         <span class="kw">let</span> <span class="ident">metric</span> <span class="op">=</span> <span class="ident">Metric::parse</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="ident">timestamp</span>).<span class="ident">unwrap</span>();
         <span class="macro">insta::assert_debug_snapshot!</span>(<span class="ident">metric</span>, @<span class="string">r###&quot;
         Metric {
-            name: &quot;foo&quot;,
+            name: &quot;g:foo&quot;,
             unit: None,
             value: Gauge(
                 42.0,
@@ -1365,10 +1384,18 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_parse_unit</span>() {
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;foo@second:17.5|d&quot;</span>;
+        <span class="kw">let</span> <span class="ident">timestamp</span> <span class="op">=</span> <span class="ident">UnixTimestamp::from_secs</span>(<span class="number">4711</span>);
+        <span class="kw">let</span> <span class="ident">metric</span> <span class="op">=</span> <span class="ident">Metric::parse</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="ident">timestamp</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">metric</span>.<span class="ident">unit</span>, <span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::Second</span>));
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_parse_unit_regression</span>() {
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;foo@s:17.5|d&quot;</span>;
         <span class="kw">let</span> <span class="ident">timestamp</span> <span class="op">=</span> <span class="ident">UnixTimestamp::from_secs</span>(<span class="number">4711</span>);
         <span class="kw">let</span> <span class="ident">metric</span> <span class="op">=</span> <span class="ident">Metric::parse</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="ident">timestamp</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">metric</span>.<span class="ident">unit</span>, <span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationPrecision::Second</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">metric</span>.<span class="ident">unit</span>, <span class="ident">MetricUnit::Duration</span>(<span class="ident">DurationUnit::Second</span>));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1412,7 +1439,7 @@
     <span class="kw">fn</span> <span class="ident">test_serde_json</span>() {
         <span class="kw">let</span> <span class="ident">json</span> <span class="op">=</span> <span class="string">r#&quot;{
   &quot;name&quot;: &quot;foo&quot;,
-  &quot;unit&quot;: &quot;s&quot;,
+  &quot;unit&quot;: &quot;second&quot;,
   &quot;type&quot;: &quot;c&quot;,
   &quot;value&quot;: 42.0,
   &quot;timestamp&quot;: 4711,
@@ -1510,6 +1537,6 @@
         <span class="macro">assert_eq!</span>(<span class="ident">metric_count</span>, <span class="number">2</span>);
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="relay_metrics" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="relay_metrics" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</body></html>

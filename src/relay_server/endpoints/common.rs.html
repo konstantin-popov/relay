@@ -1,103 +1,109 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `relay-server/src/endpoints/common.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>common.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../relay_server/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `relay-server/src/endpoints/common.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>common.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../relay_server/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../relay_server/index.html"><div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../relay_server/index.html">
+                        <img src="https://raw.githubusercontent.com/getsentry/relay/master/artwork/relay-icon.png" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -556,98 +562,7 @@
 <span id="555">555</span>
 <span id="556">556</span>
 <span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
-<span id="575">575</span>
-<span id="576">576</span>
-<span id="577">577</span>
-<span id="578">578</span>
-<span id="579">579</span>
-<span id="580">580</span>
-<span id="581">581</span>
-<span id="582">582</span>
-<span id="583">583</span>
-<span id="584">584</span>
-<span id="585">585</span>
-<span id="586">586</span>
-<span id="587">587</span>
-<span id="588">588</span>
-<span id="589">589</span>
-<span id="590">590</span>
-<span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
-<span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
-<span id="635">635</span>
-<span id="636">636</span>
-<span id="637">637</span>
-<span id="638">638</span>
-<span id="639">639</span>
-<span id="640">640</span>
-<span id="641">641</span>
-<span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-<span id="646">646</span>
-<span id="647">647</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Common facilities for ingesting events through store-like endpoints.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Common facilities for ingesting events through store-like endpoints.</span>
 
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
@@ -655,27 +570,27 @@
 <span class="kw">use</span> <span class="ident">actix::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">actix_web::http</span>::{<span class="ident">header</span>, <span class="ident">StatusCode</span>};
 <span class="kw">use</span> <span class="ident">actix_web::middleware::cors</span>::{<span class="ident">Cors</span>, <span class="ident">CorsBuilder</span>};
-<span class="kw">use</span> <span class="ident">actix_web</span>::{<span class="ident">HttpRequest</span>, <span class="ident">HttpResponse</span>, <span class="ident">ResponseError</span>};
+<span class="kw">use</span> <span class="ident">actix_web</span>::{<span class="ident">error::PayloadError</span>, <span class="ident">HttpRequest</span>, <span class="ident">HttpResponse</span>, <span class="ident">ResponseError</span>};
 <span class="kw">use</span> <span class="ident">failure::Fail</span>;
 <span class="kw">use</span> <span class="ident">futures::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">serde::Deserialize</span>;
 
-<span class="kw">use</span> <span class="ident">relay_common</span>::{<span class="ident">clone</span>, <span class="ident">metric</span>, <span class="ident">tryf</span>, <span class="ident">DataCategory</span>, <span class="ident">ProjectId</span>};
-<span class="kw">use</span> <span class="ident">relay_config::Config</span>;
+<span class="kw">use</span> <span class="ident">relay_common</span>::{<span class="ident">clone</span>, <span class="ident">tryf</span>};
 <span class="kw">use</span> <span class="ident">relay_general::protocol</span>::{<span class="ident">EventId</span>, <span class="ident">EventType</span>};
 <span class="kw">use</span> <span class="ident">relay_log::LogError</span>;
 <span class="kw">use</span> <span class="ident">relay_quotas::RateLimits</span>;
-<span class="kw">use</span> <span class="ident">relay_sampling::RuleId</span>;
+<span class="kw">use</span> <span class="ident">relay_statsd::metric</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::actors::envelopes</span>::{<span class="ident">QueueEnvelope</span>, <span class="ident">QueueEnvelopeError</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::actors::outcome</span>::{<span class="ident">DiscardReason</span>, <span class="ident">Outcome</span>, <span class="ident">TrackOutcome</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::actors::project_cache</span>::{<span class="ident">CheckEnvelope</span>, <span class="ident">ProjectError</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::body::StorePayloadError</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::envelope</span>::{<span class="ident">AttachmentType</span>, <span class="ident">Envelope</span>, <span class="ident">EnvelopeError</span>, <span class="ident">ItemType</span>, <span class="ident">Items</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::extractors::RequestMeta</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::metrics::RelayCounters</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::service</span>::{<span class="ident">ServiceApp</span>, <span class="ident">ServiceState</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils</span>::{<span class="self">self</span>, <span class="ident">ApiErrorResponse</span>, <span class="ident">EnvelopeSummary</span>, <span class="ident">FormDataIter</span>, <span class="ident">MultipartError</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::actors::envelopes</span>::{
+    <span class="ident">EnvelopeContext</span>, <span class="ident">EnvelopeManager</span>, <span class="ident">QueueEnvelope</span>, <span class="ident">QueueEnvelopeError</span>,
+};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::actors::outcome</span>::{<span class="ident">DiscardReason</span>, <span class="ident">Outcome</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::actors::project_cache</span>::{<span class="ident">CheckEnvelope</span>, <span class="ident">ProjectCache</span>, <span class="ident">ProjectError</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::envelope</span>::{<span class="ident">AttachmentType</span>, <span class="ident">Envelope</span>, <span class="ident">EnvelopeError</span>, <span class="ident">ItemType</span>, <span class="ident">Items</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::extractors::RequestMeta</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::{<span class="ident">ServiceApp</span>, <span class="ident">ServiceState</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::statsd::RelayCounters</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="self">self</span>, <span class="ident">ApiErrorResponse</span>, <span class="ident">FormDataIter</span>, <span class="ident">MultipartError</span>, <span class="ident">SendWithOutcome</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Fail</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">BadStoreRequest</span> {
@@ -683,7 +598,7 @@
     <span class="ident">UnsupportedProtocolVersion</span>(<span class="ident">u16</span>),
 
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;could not schedule event processing&quot;</span>)]</span>
-    <span class="ident">ScheduleFailed</span>(<span class="attribute">#[<span class="ident">cause</span>]</span> <span class="ident">MailboxError</span>),
+    <span class="ident">ScheduleFailed</span>,
 
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;failed to fetch project information&quot;</span>)]</span>
     <span class="ident">ProjectFailed</span>(<span class="attribute">#[<span class="ident">cause</span>]</span> <span class="ident">ProjectError</span>),
@@ -712,9 +627,6 @@
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;missing minidump&quot;</span>)]</span>
     <span class="ident">MissingMinidump</span>,
 
-    <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;invalid unreal crash report&quot;</span>)]</span>
-    <span class="ident">InvalidUnrealReport</span>,
-
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;invalid event id&quot;</span>)]</span>
     <span class="ident">InvalidEventId</span>,
 
@@ -722,72 +634,64 @@
     <span class="ident">QueueFailed</span>(<span class="attribute">#[<span class="ident">cause</span>]</span> <span class="ident">QueueEnvelopeError</span>),
 
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;failed to read request body&quot;</span>)]</span>
-    <span class="ident">PayloadError</span>(<span class="attribute">#[<span class="ident">cause</span>]</span> <span class="ident">StorePayloadError</span>),
+    <span class="ident">PayloadError</span>(<span class="attribute">#[<span class="ident">cause</span>]</span> <span class="ident">PayloadError</span>),
 
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;event rejected due to rate limit&quot;</span>)]</span>
     <span class="ident">RateLimited</span>(<span class="ident">RateLimits</span>),
 
     <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;event submission rejected with_reason: {:?}&quot;</span>, <span class="ident">_0</span>)]</span>
     <span class="ident">EventRejected</span>(<span class="ident">DiscardReason</span>),
-
-    <span class="attribute">#[<span class="ident">fail</span>(<span class="ident">display</span> <span class="op">=</span> <span class="string">&quot;envelope empty due to sampling&quot;</span>)]</span>
-    <span class="ident">TraceSampled</span>(<span class="ident">RuleId</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">BadStoreRequest</span> {
-    <span class="kw">fn</span> <span class="ident">to_outcome</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Outcome</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_outcome</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Outcome</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">BadStoreRequest::UnsupportedProtocolVersion</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::UnsupportedProtocolVersion</span>(<span class="kw">_</span>) =&gt; {
                 <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::AuthVersion</span>)
             }
 
-            <span class="ident">BadStoreRequest::InvalidUnrealReport</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::MissingMinidumpUpload</span>)
-            }
-
-            <span class="ident">BadStoreRequest::EmptyBody</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::NoData</span>),
-            <span class="ident">BadStoreRequest::EmptyEnvelope</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::EmptyEnvelope</span>),
-            <span class="ident">BadStoreRequest::InvalidJson</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidJson</span>),
-            <span class="ident">BadStoreRequest::InvalidMsgpack</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidMsgpack</span>),
-            <span class="ident">BadStoreRequest::InvalidMultipart</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::EmptyBody</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::NoData</span>),
+            <span class="ident">BadStoreRequest::EmptyEnvelope</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::EmptyEnvelope</span>),
+            <span class="ident">BadStoreRequest::InvalidJson</span>(<span class="kw">_</span>) =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidJson</span>),
+            <span class="ident">BadStoreRequest::InvalidMsgpack</span>(<span class="kw">_</span>) =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidMsgpack</span>),
+            <span class="ident">BadStoreRequest::InvalidMultipart</span>(<span class="kw">_</span>) =&gt; {
                 <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidMultipart</span>)
             }
-            <span class="ident">BadStoreRequest::InvalidMinidump</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidMinidump</span>),
-            <span class="ident">BadStoreRequest::MissingMinidump</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::InvalidMinidump</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidMinidump</span>),
+            <span class="ident">BadStoreRequest::MissingMinidump</span> =&gt; {
                 <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::MissingMinidumpUpload</span>)
             }
-            <span class="ident">BadStoreRequest::InvalidEnvelope</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidEnvelope</span>),
+            <span class="ident">BadStoreRequest::InvalidEnvelope</span>(<span class="kw">_</span>) =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::InvalidEnvelope</span>),
 
-            <span class="ident">BadStoreRequest::QueueFailed</span>(<span class="ident">event_error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">event_error</span> {
-                <span class="ident">QueueEnvelopeError::TooManyEnvelopes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
+            <span class="ident">BadStoreRequest::QueueFailed</span>(<span class="ident">event_error</span>) =&gt; <span class="kw">match</span> <span class="ident">event_error</span> {
+                <span class="ident">QueueEnvelopeError::TooManyEnvelopes</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
             },
-            <span class="ident">BadStoreRequest::ProjectFailed</span>(<span class="ident">project_error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">project_error</span> {
-                <span class="ident">ProjectError::FetchFailed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::ProjectState</span>),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
+            <span class="ident">BadStoreRequest::ProjectFailed</span>(<span class="ident">project_error</span>) =&gt; <span class="kw">match</span> <span class="ident">project_error</span> {
+                <span class="ident">ProjectError::FetchFailed</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::ProjectState</span>),
+                <span class="kw">_</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
             },
-            <span class="ident">BadStoreRequest::ScheduleFailed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
-            <span class="ident">BadStoreRequest::EventRejected</span>(<span class="ident">reason</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="kw-2">*</span><span class="ident">reason</span>),
-            <span class="ident">BadStoreRequest::PayloadError</span>(<span class="ident">payload_error</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">Outcome::Invalid</span>(<span class="ident">payload_error</span>.<span class="ident">discard_reason</span>())
-            }
-
-            <span class="ident">BadStoreRequest::TraceSampled</span>(<span class="ident">rule_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::FilteredSampling</span>(<span class="kw-2">*</span><span class="ident">rule_id</span>),
+            <span class="ident">BadStoreRequest::PayloadError</span>(<span class="ident">payload_error</span>) =&gt; <span class="kw">match</span> <span class="ident">payload_error</span> {
+                <span class="ident">PayloadError::Overflow</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::TooLarge</span>),
+                <span class="kw">_</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Payload</span>),
+            },
 
             <span class="comment">// should actually never create an outcome</span>
-            <span class="ident">BadStoreRequest::InvalidEventId</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
+            <span class="ident">BadStoreRequest::InvalidEventId</span> =&gt; <span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::Internal</span>),
 
-            <span class="comment">// Rate limiting outcomes are emitted at the source.</span>
-            <span class="ident">BadStoreRequest::RateLimited</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
+            <span class="comment">// Outcomes emitted at the source</span>
+            <span class="ident">BadStoreRequest::EventRejected</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+            <span class="ident">BadStoreRequest::RateLimited</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+            <span class="ident">BadStoreRequest::ScheduleFailed</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
         })
     }
 }
 
 <span class="kw">impl</span> <span class="ident">ResponseError</span> <span class="kw">for</span> <span class="ident">BadStoreRequest</span> {
-    <span class="kw">fn</span> <span class="ident">error_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpResponse</span> {
+    <span class="kw">fn</span> <span class="ident">error_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">HttpResponse</span> {
         <span class="kw">let</span> <span class="ident">body</span> <span class="op">=</span> <span class="ident">ApiErrorResponse::from_fail</span>(<span class="self">self</span>);
 
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">BadStoreRequest::RateLimited</span>(<span class="ident">rate_limits</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::RateLimited</span>(<span class="ident">rate_limits</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">retry_after_header</span> <span class="op">=</span> <span class="ident">rate_limits</span>
                     .<span class="ident">longest</span>()
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">limit</span><span class="op">|</span> <span class="ident">limit</span>.<span class="ident">retry_after</span>.<span class="ident">remaining_seconds</span>().<span class="ident">to_string</span>())
@@ -803,31 +707,31 @@
                     .<span class="ident">header</span>(<span class="ident">utils::RATE_LIMITS_HEADER</span>, <span class="ident">rate_limits_header</span>)
                     .<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>)
             }
-            <span class="ident">BadStoreRequest::ProjectFailed</span>(<span class="ident">project_error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">project_error</span> {
-                <span class="ident">ProjectError::FetchFailed</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::ProjectFailed</span>(<span class="ident">project_error</span>) =&gt; <span class="kw">match</span> <span class="ident">project_error</span> {
+                <span class="ident">ProjectError::FetchFailed</span> =&gt; {
                     <span class="comment">// This particular project is somehow broken. We could treat this as 503 but it&#39;s</span>
                     <span class="comment">// more likely that the error is local to this project.</span>
                     <span class="ident">HttpResponse::InternalServerError</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>)
                 }
-                <span class="ident">ProjectError::ScheduleFailed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HttpResponse::ServiceUnavailable</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>),
+                <span class="ident">ProjectError::ScheduleFailed</span> =&gt; <span class="ident">HttpResponse::ServiceUnavailable</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>),
             },
 
-            <span class="ident">BadStoreRequest::ScheduleFailed</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">BadStoreRequest::QueueFailed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::ScheduleFailed</span> <span class="op">|</span> <span class="ident">BadStoreRequest::QueueFailed</span>(<span class="kw">_</span>) =&gt; {
                 <span class="comment">// These errors indicate that something&#39;s wrong with our actor system, most likely</span>
                 <span class="comment">// mailbox congestion or a faulty shutdown. Indicate an unavailable service to the</span>
                 <span class="comment">// client. It might retry event submission at a later time.</span>
                 <span class="ident">HttpResponse::ServiceUnavailable</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>)
             }
-            <span class="ident">BadStoreRequest::EventRejected</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::EventRejected</span>(<span class="kw">_</span>) =&gt; {
                 <span class="comment">// The event has been discarded, which is generally indicated with a 403 error.</span>
                 <span class="comment">// Originally, Sentry also used this status code for event filters, but these are</span>
                 <span class="comment">// now executed asynchronously in `EnvelopeProcessor`.</span>
                 <span class="ident">HttpResponse::Forbidden</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>)
             }
-            <span class="ident">BadStoreRequest::PayloadError</span>(<span class="ident">StorePayloadError::Overflow</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">BadStoreRequest::PayloadError</span>(<span class="ident">PayloadError::Overflow</span>) =&gt; {
                 <span class="ident">HttpResponse::PayloadTooLarge</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>)
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="comment">// In all other cases, we indicate a generic bad request to the client and render</span>
                 <span class="comment">// the cause. This was likely the client&#39;s fault.</span>
                 <span class="ident">HttpResponse::BadRequest</span>().<span class="ident">json</span>(<span class="kw-2">&amp;</span><span class="ident">body</span>)
@@ -848,7 +752,7 @@
 <span class="doccomment">/// Parses a minimal subset of the event payload.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This function validates that the provided payload is valid and returns an `Err` on parse errors.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">minimal_event_from_json</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MinimalEvent</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">minimal_event_from_json</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MinimalEvent</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
     <span class="ident">serde_json::from_slice</span>(<span class="ident">data</span>).<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::InvalidJson</span>)
 }
 
@@ -857,7 +761,7 @@
 <span class="doccomment">/// If the payload contains no event id, `Ok(None)` is returned. This function also validates that</span>
 <span class="doccomment">/// the provided is valid and returns an `Err` on parse errors. If the event id itself is malformed,</span>
 <span class="doccomment">/// an `Err` is returned.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_json</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_json</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
     <span class="ident">minimal_event_from_json</span>(<span class="ident">data</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">event</span><span class="op">|</span> <span class="ident">event</span>.<span class="ident">id</span>)
 }
 
@@ -866,7 +770,7 @@
 <span class="doccomment">/// If the payload contains no event id, `Ok(None)` is returned. This function also validates that</span>
 <span class="doccomment">/// the provided is valid and returns an `Err` on parse errors. If the event id itself is malformed,</span>
 <span class="doccomment">/// an `Err` is returned.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_msgpack</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_msgpack</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
     <span class="ident">rmp_serde::from_slice</span>(<span class="ident">data</span>)
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">MinimalEvent</span> { <span class="ident">id</span>, .. }<span class="op">|</span> <span class="ident">id</span>)
         .<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::InvalidMsgpack</span>)
@@ -876,11 +780,11 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// If the event id itself is malformed, an `Err` is returned. If there is a `sentry` key containing</span>
 <span class="doccomment">/// malformed JSON, an error is returned.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_formdata</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_formdata</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
     <span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="ident">FormDataIter::new</span>(<span class="ident">data</span>) {
-        <span class="kw">if</span> <span class="ident">entry</span>.<span class="ident">key</span>() <span class="op">=</span><span class="op">=</span> <span class="string">&quot;sentry&quot;</span> {
+        <span class="kw">if</span> <span class="ident">entry</span>.<span class="ident">key</span>() <span class="op">==</span> <span class="string">&quot;sentry&quot;</span> {
             <span class="kw">return</span> <span class="ident">event_id_from_json</span>(<span class="ident">entry</span>.<span class="ident">value</span>().<span class="ident">as_bytes</span>());
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">entry</span>.<span class="ident">key</span>() <span class="op">=</span><span class="op">=</span> <span class="string">&quot;sentry[event_id]&quot;</span> {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">entry</span>.<span class="ident">key</span>() <span class="op">==</span> <span class="string">&quot;sentry[event_id]&quot;</span> {
             <span class="kw">return</span> <span class="ident">entry</span>
                 .<span class="ident">value</span>()
                 .<span class="ident">parse</span>()
@@ -906,8 +810,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Extracting the event id from chunked formdata fields on the Minidump endpoint (`sentry__1`,</span>
 <span class="doccomment">/// `sentry__2`, ...) is not supported. In this case, `None` is returned.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_items</span>(<span class="ident">items</span>: <span class="kw-2">&amp;</span><span class="ident">Items</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span> <span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">ty</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">ItemType::Event</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_id_from_items</span>(<span class="ident">items</span>: <span class="kw-2">&amp;</span><span class="ident">Items</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span> <span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">ty</span>() <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">ItemType::Event</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event_id</span>) <span class="op">=</span> <span class="ident">event_id_from_json</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">payload</span>())<span class="question-mark">?</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">event_id</span>));
         }
@@ -915,14 +819,14 @@
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span> <span class="ident">items</span>
         .<span class="ident">iter</span>()
-        .<span class="ident">find</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">attachment_type</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">AttachmentType::EventPayload</span>))
+        .<span class="ident">find</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">attachment_type</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">AttachmentType::EventPayload</span>))
     {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event_id</span>) <span class="op">=</span> <span class="ident">event_id_from_msgpack</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">payload</span>())<span class="question-mark">?</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">event_id</span>));
         }
     }
 
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span> <span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">ty</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">ItemType::FormData</span>) {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span> <span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">ty</span>() <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">ItemType::FormData</span>) {
         <span class="comment">// Swallow all other errors here since it is quite common to receive invalid secondary</span>
         <span class="comment">// payloads. `EnvelopeProcessor` also retains events in such cases.</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">event_id</span>)) <span class="op">=</span> <span class="ident">event_id_from_formdata</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">payload</span>()) {
@@ -938,7 +842,7 @@
 <span class="doccomment">/// To configure CORS, register endpoints using `resource()` and finalize by calling `register()`, which</span>
 <span class="doccomment">/// returns an App. This configures POST as allowed method, allows default sentry headers, and</span>
 <span class="doccomment">/// exposes the return headers.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cors</span>(<span class="ident">app</span>: <span class="ident">ServiceApp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CorsBuilder</span><span class="op">&lt;</span><span class="ident">ServiceState</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cors</span>(<span class="ident">app</span>: <span class="ident">ServiceApp</span>) -&gt; <span class="ident">CorsBuilder</span><span class="op">&lt;</span><span class="ident">ServiceState</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">Cors::for_app</span>(<span class="ident">app</span>);
 
     <span class="ident">builder</span>
@@ -966,50 +870,6 @@
     <span class="ident">builder</span>
 }
 
-<span class="doccomment">/// Checks for size limits of items in this envelope.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Returns `true`, if the envelope adheres to the configured size limits. Otherwise, returns</span>
-<span class="doccomment">/// `false`, in which case the envelope should be discarded and a `413 Payload Too Large` response</span>
-<span class="doccomment">/// shoult be given.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The following limits are checked:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///  - `max_event_size`</span>
-<span class="doccomment">///  - `max_attachment_size`</span>
-<span class="doccomment">///  - `max_attachments_size`</span>
-<span class="doccomment">///  - `max_session_count`</span>
-<span class="kw">fn</span> <span class="ident">check_envelope_size_limits</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">envelope</span>: <span class="kw-2">&amp;</span><span class="ident">Envelope</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">event_size</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">attachments_size</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">session_count</span> <span class="op">=</span> <span class="number">0</span>;
-
-    <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="ident">envelope</span>.<span class="ident">items</span>() {
-        <span class="kw">match</span> <span class="ident">item</span>.<span class="ident">ty</span>() {
-            <span class="ident">ItemType::Event</span>
-            <span class="op">|</span> <span class="ident">ItemType::Transaction</span>
-            <span class="op">|</span> <span class="ident">ItemType::Security</span>
-            <span class="op">|</span> <span class="ident">ItemType::RawSecurity</span>
-            <span class="op">|</span> <span class="ident">ItemType::FormData</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">event_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">item</span>.<span class="ident">len</span>(),
-            <span class="ident">ItemType::Attachment</span> <span class="op">|</span> <span class="ident">ItemType::UnrealReport</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">item</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">config</span>.<span class="ident">max_attachment_size</span>() {
-                    <span class="kw">return</span> <span class="bool-val">false</span>;
-                }
-
-                <span class="ident">attachments_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">item</span>.<span class="ident">len</span>()
-            }
-            <span class="ident">ItemType::Session</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">session_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="ident">ItemType::Sessions</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">session_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="ident">ItemType::UserReport</span> <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="ident">ItemType::Metrics</span> <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="ident">ItemType::MetricBuckets</span> <span class="op">=</span><span class="op">&gt;</span> (),
-        }
-    }
-
-    <span class="ident">event_size</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">max_event_size</span>()
-        <span class="op">&amp;&amp;</span> <span class="ident">attachments_size</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">max_attachments_size</span>()
-        <span class="op">&amp;&amp;</span> <span class="ident">session_count</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">max_session_count</span>()
-}
-
 <span class="doccomment">/// Handles Sentry events.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Sentry events may come either directly from a http request ( the store endpoint calls this</span>
@@ -1024,14 +884,12 @@
     <span class="ident">extract_envelope</span>: <span class="ident">F</span>,
     <span class="ident">create_response</span>: <span class="ident">R</span>,
     <span class="ident">emit_rate_limit</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ResponseFuture</span><span class="op">&lt;</span><span class="ident">HttpResponse</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span>
+) -&gt; <span class="ident">ResponseFuture</span><span class="op">&lt;</span><span class="ident">HttpResponse</span>, <span class="ident">BadStoreRequest</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">HttpRequest</span><span class="op">&lt;</span><span class="ident">ServiceState</span><span class="op">&gt;</span>, <span class="ident">RequestMeta</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">I</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">HttpRequest</span><span class="op">&lt;</span><span class="ident">ServiceState</span><span class="op">&gt;</span>, <span class="ident">RequestMeta</span>) -&gt; <span class="ident">I</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="ident">I</span>: <span class="ident">IntoFuture</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Envelope</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">BadStoreRequest</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">R</span>: <span class="ident">FnOnce</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpResponse</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">R</span>: <span class="ident">FnOnce</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>) -&gt; <span class="ident">HttpResponse</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">let</span> <span class="ident">start_time</span> <span class="op">=</span> <span class="ident">meta</span>.<span class="ident">start_time</span>();
-
     <span class="comment">// For now, we only handle &lt;= v8 and drop everything else</span>
     <span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="ident">meta</span>.<span class="ident">version</span>();
     <span class="kw">if</span> <span class="ident">version</span> <span class="op">&gt;</span> <span class="ident">relay_common::PROTOCOL_VERSION</span> {
@@ -1045,94 +903,87 @@
     );
 
     <span class="kw">let</span> <span class="ident">project_key</span> <span class="op">=</span> <span class="ident">meta</span>.<span class="ident">public_key</span>();
-
-    <span class="kw">let</span> <span class="ident">event_manager</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">state</span>().<span class="ident">envelope_manager</span>();
-    <span class="kw">let</span> <span class="ident">project_manager</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">state</span>().<span class="ident">project_cache</span>();
-    <span class="kw">let</span> <span class="ident">outcome_producer</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">state</span>().<span class="ident">outcome_producer</span>();
-    <span class="kw">let</span> <span class="ident">remote_addr</span> <span class="op">=</span> <span class="ident">meta</span>.<span class="ident">client_addr</span>();
-
-    <span class="kw">let</span> <span class="ident">scoping</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">meta</span>.<span class="ident">get_partial_scoping</span>()));
-    <span class="kw">let</span> <span class="ident">event_id</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="prelude-val">None</span>));
-    <span class="kw">let</span> <span class="ident">envelope_summary</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">EnvelopeSummary::empty</span>()));
+    <span class="kw">let</span> <span class="ident">start_time</span> <span class="op">=</span> <span class="ident">meta</span>.<span class="ident">start_time</span>();
     <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">state</span>().<span class="ident">config</span>();
-    <span class="kw">let</span> <span class="ident">processing_enabled</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">processing_enabled</span>();
 
-    <span class="kw">let</span> <span class="ident">project_id</span> <span class="op">=</span> <span class="ident">meta</span>.<span class="ident">project_id</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ProjectId::new</span>(<span class="number">0</span>));
-    <span class="kw">let</span> <span class="ident">is_internal</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">processing_internal_projects</span>().<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">project_id</span>);
+    <span class="kw">let</span> <span class="ident">envelope_context</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">EnvelopeContext::from_request</span>(<span class="kw-2">&amp;</span><span class="ident">meta</span>)));
 
     <span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">extract_envelope</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>, <span class="ident">meta</span>)
         .<span class="ident">into_future</span>()
-        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">event_id</span>, <span class="ident">envelope_summary</span>, <span class="op">|</span><span class="ident">envelope</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">summary</span> <span class="op">=</span> <span class="ident">EnvelopeSummary::compute</span>(<span class="kw-2">&amp;</span><span class="ident">envelope</span>);
+        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">config</span>, <span class="ident">envelope_context</span>, <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">envelope</span><span class="op">|</span> {
+            <span class="ident">envelope_context</span>.<span class="ident">borrow_mut</span>().<span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="ident">envelope</span>);
 
-            <span class="kw">if</span> <span class="ident">is_internal</span> <span class="op">&amp;&amp;</span> <span class="ident">summary</span>.<span class="ident">event_category</span> <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">DataCategory::Transaction</span>) {
-                <span class="macro">metric!</span>(
-                    <span class="ident">counter</span>(<span class="ident">RelayCounters::InternalCapturedEventEndpoint</span>) <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-                    <span class="ident">project</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">project_id</span>.<span class="ident">to_string</span>()
-                );
-            }
-
-            <span class="ident">event_id</span>.<span class="ident">replace</span>(<span class="ident">envelope</span>.<span class="ident">event_id</span>());
-            <span class="ident">envelope_summary</span>.<span class="ident">replace</span>(<span class="ident">summary</span>);
+            <span class="comment">// If configured, remove unknown items at the very beginning. If the envelope is</span>
+            <span class="comment">// empty, we fail the request with a special control flow error to skip checks and</span>
+            <span class="comment">// queueing, that still results in a `200 OK` response.</span>
+            <span class="ident">utils::remove_unknown_items</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>, <span class="kw-2">&amp;mut</span> <span class="ident">envelope</span>);
 
             <span class="kw">if</span> <span class="ident">envelope</span>.<span class="ident">is_empty</span>() {
+                <span class="comment">// envelope is empty, cannot send outcomes</span>
                 <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::EmptyEnvelope</span>)
             } <span class="kw">else</span> {
                 <span class="prelude-val">Ok</span>(<span class="ident">envelope</span>)
             }
         }))
-        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">project_manager</span>, <span class="op">|</span><span class="ident">envelope</span><span class="op">|</span> {
-            <span class="ident">project_manager</span>
-                .<span class="ident">send</span>(<span class="ident">CheckEnvelope::cached</span>(<span class="ident">project_key</span>, <span class="ident">envelope</span>))
-                .<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::ScheduleFailed</span>)
+        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">envelope_context</span>, <span class="op">|</span><span class="ident">envelope</span><span class="op">|</span> {
+            <span class="ident">ProjectCache::from_registry</span>()
+                .<span class="ident">send_tracked</span>(
+                    <span class="ident">CheckEnvelope::cached</span>(<span class="ident">project_key</span>, <span class="ident">envelope</span>),
+                    <span class="kw-2">*</span><span class="ident">envelope_context</span>.<span class="ident">clone</span>().<span class="ident">borrow</span>(),
+                )
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">BadStoreRequest::ScheduleFailed</span>)
                 .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">result</span><span class="op">|</span> <span class="ident">result</span>.<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::ProjectFailed</span>))
+                .<span class="ident">map_err</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">outcome</span>) <span class="op">=</span> <span class="ident">err</span>.<span class="ident">to_outcome</span>() {
+                        <span class="ident">envelope_context</span>.<span class="ident">borrow</span>().<span class="ident">send_outcomes</span>(<span class="ident">outcome</span>);
+                    }
+                    <span class="ident">err</span>
+                })
         }))
-        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">scoping</span>, <span class="ident">envelope_summary</span>, <span class="op">|</span><span class="ident">response</span><span class="op">|</span> {
-            <span class="ident">scoping</span>.<span class="ident">replace</span>(<span class="ident">response</span>.<span class="ident">scoping</span>);
+        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">envelope_context</span>, <span class="op">|</span><span class="ident">response</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">envelope_context</span> <span class="op">=</span> <span class="ident">envelope_context</span>.<span class="ident">borrow_mut</span>();
+            <span class="ident">envelope_context</span>.<span class="ident">scope</span>(<span class="ident">response</span>.<span class="ident">scoping</span>);
 
-            <span class="kw">let</span> <span class="ident">checked</span> <span class="op">=</span> <span class="ident">response</span>.<span class="ident">result</span>.<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::EventRejected</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">checked</span> <span class="op">=</span> <span class="ident">response</span>.<span class="ident">result</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">reason</span><span class="op">|</span> {
+                <span class="ident">envelope_context</span>.<span class="ident">send_outcomes</span>(<span class="ident">Outcome::Invalid</span>(<span class="ident">reason</span>));
+                <span class="ident">BadStoreRequest::EventRejected</span>(<span class="ident">reason</span>)
+            })<span class="question-mark">?</span>;
 
             <span class="comment">// Skip over queuing and issue a rate limit right away</span>
             <span class="kw">let</span> <span class="ident">envelope</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">checked</span>.<span class="ident">envelope</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">envelope</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">envelope</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::RateLimited</span>(<span class="ident">checked</span>.<span class="ident">rate_limits</span>)),
+                <span class="prelude-val">Some</span>(<span class="ident">envelope</span>) =&gt; <span class="ident">envelope</span>,
+                <span class="comment">// rate limit outcome logged by CheckEnvelope already</span>
+                <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::RateLimited</span>(<span class="ident">checked</span>.<span class="ident">rate_limits</span>)),
             };
 
-            <span class="ident">envelope_summary</span>.<span class="ident">replace</span>(<span class="ident">EnvelopeSummary::compute</span>(<span class="kw-2">&amp;</span><span class="ident">envelope</span>));
-            <span class="kw">if</span> <span class="ident">check_envelope_size_limits</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>, <span class="kw-2">&amp;</span><span class="ident">envelope</span>) {
+            <span class="ident">envelope_context</span>.<span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="ident">envelope</span>);
+            <span class="kw">if</span> <span class="ident">utils::check_envelope_size_limits</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>, <span class="kw-2">&amp;</span><span class="ident">envelope</span>) {
                 <span class="prelude-val">Ok</span>((<span class="ident">envelope</span>, <span class="ident">checked</span>.<span class="ident">rate_limits</span>))
             } <span class="kw">else</span> {
-                <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::PayloadError</span>(<span class="ident">StorePayloadError::Overflow</span>))
+                <span class="ident">envelope_context</span>.<span class="ident">send_outcomes</span>(<span class="ident">Outcome::Invalid</span>(<span class="ident">DiscardReason::TooLarge</span>));
+                <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::PayloadError</span>(<span class="ident">PayloadError::Overflow</span>))
             }
         }))
-        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">project_manager</span>, <span class="op">|</span>(<span class="ident">envelope</span>, <span class="ident">rate_limits</span>)<span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">sampling_project_key</span> <span class="op">=</span> <span class="ident">envelope</span>.<span class="ident">trace_context</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">tc</span><span class="op">|</span> <span class="ident">tc</span>.<span class="ident">public_key</span>);
-
-            <span class="ident">utils::sample_trace</span>(
+        .<span class="ident">and_then</span>(<span class="macro">clone!</span>(<span class="ident">envelope_context</span>, <span class="op">|</span>(<span class="ident">envelope</span>, <span class="ident">rate_limits</span>)<span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">QueueEnvelope</span> {
                 <span class="ident">envelope</span>,
-                <span class="ident">sampling_project_key</span>,
-                <span class="ident">project_manager</span>,
-                <span class="bool-val">true</span>,
-                <span class="ident">processing_enabled</span>,
-            )
-            .<span class="ident">then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">result</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">result</span> {
-                <span class="prelude-val">Err</span>(<span class="ident">rule_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::TraceSampled</span>(<span class="ident">rule_id</span>)),
-                <span class="prelude-val">Ok</span>(<span class="ident">envelope</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>((<span class="ident">envelope</span>, <span class="ident">rate_limits</span>, <span class="ident">sampling_project_key</span>)),
-            })
-        }))
-        .<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">envelope</span>, <span class="ident">rate_limits</span>, <span class="ident">sampling_project_key</span>)<span class="op">|</span> {
-            <span class="ident">event_manager</span>
-                .<span class="ident">send</span>(<span class="ident">QueueEnvelope</span> {
-                    <span class="ident">envelope</span>,
-                    <span class="ident">project_key</span>,
-                    <span class="ident">sampling_project_key</span>,
-                    <span class="ident">project_cache</span>: <span class="ident">project_manager</span>.<span class="ident">clone</span>(),
-                    <span class="ident">start_time</span>,
-                })
-                .<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::ScheduleFailed</span>)
+                <span class="ident">project_key</span>,
+                <span class="ident">start_time</span>,
+            };
+
+            <span class="ident">EnvelopeManager::from_registry</span>()
+                .<span class="ident">send_tracked</span>(<span class="ident">message</span>, <span class="kw-2">*</span><span class="ident">envelope_context</span>.<span class="ident">clone</span>().<span class="ident">borrow</span>())
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">BadStoreRequest::ScheduleFailed</span>)
                 .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">result</span><span class="op">|</span> <span class="ident">result</span>.<span class="ident">map_err</span>(<span class="ident">BadStoreRequest::QueueFailed</span>))
+                .<span class="ident">map_err</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">outcome</span>) <span class="op">=</span> <span class="ident">err</span>.<span class="ident">to_outcome</span>() {
+                        <span class="comment">// TODO: Move this into Handler&lt;QueueEnvelope&gt;</span>
+                        <span class="ident">envelope_context</span>.<span class="ident">borrow</span>().<span class="ident">send_outcomes</span>(<span class="ident">outcome</span>)
+                    }
+                    <span class="ident">err</span>
+                })
                 .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">event_id</span><span class="op">|</span> (<span class="ident">event_id</span>, <span class="ident">rate_limits</span>))
-        })
+        }))
         .<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">event_id</span>, <span class="ident">rate_limits</span>)<span class="op">|</span> {
             <span class="kw">if</span> <span class="ident">rate_limits</span>.<span class="ident">is_limited</span>() {
                 <span class="prelude-val">Err</span>(<span class="ident">BadStoreRequest::RateLimited</span>(<span class="ident">rate_limits</span>))
@@ -1142,41 +993,15 @@
         })
         .<span class="ident">or_else</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">error</span>: <span class="ident">BadStoreRequest</span><span class="op">|</span> {
             <span class="macro">metric!</span>(<span class="ident">counter</span>(<span class="ident">RelayCounters::EnvelopeRejected</span>) <span class="op">+</span><span class="op">=</span> <span class="number">1</span>);
-
-            <span class="kw">let</span> <span class="ident">envelope_summary</span> <span class="op">=</span> <span class="ident">envelope_summary</span>.<span class="ident">borrow</span>();
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">outcome</span>) <span class="op">=</span> <span class="ident">error</span>.<span class="ident">to_outcome</span>() {
-                <span class="kw">let</span> <span class="ident">timestamp</span> <span class="op">=</span> <span class="ident">relay_common::instant_to_date_time</span>(<span class="ident">start_time</span>);
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">category</span>) <span class="op">=</span> <span class="ident">envelope_summary</span>.<span class="ident">event_category</span> {
-                    <span class="ident">outcome_producer</span>.<span class="ident">do_send</span>(<span class="ident">TrackOutcome</span> {
-                        <span class="ident">timestamp</span>,
-                        <span class="ident">scoping</span>: <span class="kw-2">*</span><span class="ident">scoping</span>.<span class="ident">borrow</span>(),
-                        <span class="ident">outcome</span>: <span class="ident">outcome</span>.<span class="ident">clone</span>(),
-                        <span class="ident">event_id</span>: <span class="kw-2">*</span><span class="ident">event_id</span>.<span class="ident">borrow</span>(),
-                        <span class="ident">remote_addr</span>,
-                        <span class="ident">category</span>,
-                        <span class="ident">quantity</span>: <span class="number">1</span>,
-                    });
-                }
-
-                <span class="kw">if</span> <span class="ident">envelope_summary</span>.<span class="ident">attachment_quantity</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                    <span class="ident">outcome_producer</span>.<span class="ident">do_send</span>(<span class="ident">TrackOutcome</span> {
-                        <span class="ident">timestamp</span>,
-                        <span class="ident">scoping</span>: <span class="kw-2">*</span><span class="ident">scoping</span>.<span class="ident">borrow</span>(),
-                        <span class="ident">outcome</span>,
-                        <span class="ident">event_id</span>: <span class="kw-2">*</span><span class="ident">event_id</span>.<span class="ident">borrow</span>(),
-                        <span class="ident">remote_addr</span>,
-                        <span class="ident">category</span>: <span class="ident">DataCategory::Attachment</span>,
-                        <span class="ident">quantity</span>: <span class="ident">envelope_summary</span>.<span class="ident">attachment_quantity</span>,
-                    });
-                }
-            }
+            <span class="kw">let</span> <span class="ident">event_id</span> <span class="op">=</span> <span class="ident">envelope_context</span>.<span class="ident">borrow</span>().<span class="ident">event_id</span>();
 
             <span class="kw">if</span> <span class="op">!</span><span class="ident">emit_rate_limit</span> <span class="op">&amp;&amp;</span> <span class="macro">matches!</span>(<span class="ident">error</span>, <span class="ident">BadStoreRequest::RateLimited</span>(<span class="kw">_</span>)) {
-                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">create_response</span>(<span class="kw-2">*</span><span class="ident">event_id</span>.<span class="ident">borrow</span>()));
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">create_response</span>(<span class="ident">event_id</span>));
             }
 
-            <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">error</span>, <span class="ident">BadStoreRequest::TraceSampled</span>(<span class="kw">_</span>)) {
-                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">create_response</span>(<span class="kw-2">*</span><span class="ident">event_id</span>.<span class="ident">borrow</span>()));
+            <span class="comment">// This is a control-flow error without a bad status code.</span>
+            <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">error</span>, <span class="ident">BadStoreRequest::EmptyEnvelope</span>) {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">create_response</span>(<span class="ident">event_id</span>));
             }
 
             <span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">error</span>.<span class="ident">error_response</span>();
@@ -1191,7 +1016,7 @@
 }
 
 <span class="doccomment">/// Creates a HttpResponse containing the textual representation of the given EventId</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_text_event_id_response</span>(<span class="ident">id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpResponse</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_text_event_id_response</span>(<span class="ident">id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EventId</span><span class="op">&gt;</span>) -&gt; <span class="ident">HttpResponse</span> {
     <span class="comment">// Event id is set statically in the ingest path.</span>
     <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">unwrap_or_default</span>();
     <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">id</span>.<span class="ident">is_nil</span>());
@@ -1207,7 +1032,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Write `normpath(&quot;api/store&quot;)` to create a route pattern that matches &quot;/api/store/&quot;,</span>
 <span class="doccomment">/// &quot;api//store&quot;, &quot;api//store////&quot;, etc.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normpath</span>(<span class="ident">route</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normpath</span>(<span class="ident">route</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">String</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pattern</span> <span class="op">=</span> <span class="ident">String::new</span>();
     <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">segment</span>) <span class="kw">in</span> <span class="ident">route</span>.<span class="ident">trim_matches</span>(<span class="string">&#39;/&#39;</span>).<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>).<span class="ident">enumerate</span>() {
         <span class="comment">// Apparently the leading slash needs to be explicit and cannot be part of a pattern</span>
@@ -1294,6 +1119,6 @@
         );
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="relay_server" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="relay_server" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</body></html>
